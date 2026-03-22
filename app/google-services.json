@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "352304304909",
+    "project_id": "meutcc2026-10a1c",
+    "storage_bucket": "meutcc2026-10a1c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:352304304909:android:430df7dbcb9103c581d644",
+        "android_client_info": {
+          "package_name": "com.borgeiz.meutcc2026"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNbm1HqxJbxJdkAwheOy5-5QQX8aKsLiQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
