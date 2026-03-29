@@ -1,5 +1,6 @@
 package com.borgeiz.meutcc2026
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -17,7 +18,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnLer: Button
     private lateinit var btnAtualizar: Button
     private lateinit var btnDeletar: Button
+    private lateinit var btnLogin: Button
     private lateinit var txtResultado: TextView
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,16 +33,16 @@ class MainActivity : AppCompatActivity() {
         btnLer = findViewById(R.id.btnLer)
         btnAtualizar = findViewById(R.id.btnAtualizar)
         btnDeletar = findViewById(R.id.btnDeletar)
+        btnLogin = findViewById(R.id.btnLogin)
         txtResultado = findViewById(R.id.txtResultado)
 
-        //inicializa o firebase
         database = FirebaseDatabase.getInstance().getReference("users")
 
-        //relacionando botões com CRUD
         btnCriar.setOnClickListener { criarUsuario() }
         btnLer.setOnClickListener { lerUsuario() }
         btnAtualizar.setOnClickListener { atualizarUsuario() }
         btnDeletar.setOnClickListener { deletarUsuario() }
+        btnLogin.setOnClickListener { loginUsuario() }
     }
 
     // ================= CREATE =================
@@ -92,6 +95,41 @@ class MainActivity : AppCompatActivity() {
             })
         } else {
             txtResultado.text = "Informe o UID para ler"
+        }
+    }
+    //login
+    private fun loginUsuario() {
+        val uid = editUid.text.toString()
+        val nome = editNome.text.toString()
+        val idade = editIdade.text.toString()
+
+        if (uid.isNotEmpty() && nome.isNotEmpty() && idade.isNotEmpty()) {
+
+            database.child(uid).addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+
+                    val usuario = snapshot.getValue(Usuario::class.java)
+
+                    if (usuario != null &&
+                        usuario.nome == nome &&
+                        usuario.idade == idade) {
+
+                        // Login correto → vai pra outra tela
+                        val intent = Intent(this@MainActivity, SecondActivity::class.java)
+                        startActivity(intent)
+
+                    } else {
+                        txtResultado.text = "Usuário não encontrado ou dados incorretos"
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    txtResultado.text = "Erro: ${error.message}"
+                }
+            })
+
+        } else {
+            txtResultado.text = "Preencha UID, nome e idade"
         }
     }
 
