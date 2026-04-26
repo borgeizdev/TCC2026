@@ -10,11 +10,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val btnDashboard = findViewById<Button>(R.id.btnDashboard)
-        val btnTransactions = findViewById<Button>(R.id.btnTransactions)
-        val btnAdd = findViewById<Button>(R.id.btnAdd)
-        val btnReports = findViewById<Button>(R.id.btnReports)
-        val btnProfile = findViewById<Button>(R.id.btnProfile)
+        val btnDashboard = findViewById<android.view.View>(R.id.btnDashboard)
+        val btnTransactions = findViewById<android.view.View>(R.id.btnTransactions)
+        val btnAdd = findViewById<android.view.View>(R.id.btnAdd)
+        val btnReports = findViewById<android.view.View>(R.id.btnReports)
+        val btnProfile = findViewById<android.view.View>(R.id.btnProfile)
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.frameContainer, DashboardFragment())
