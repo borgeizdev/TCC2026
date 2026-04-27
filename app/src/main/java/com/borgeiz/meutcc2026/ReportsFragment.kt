@@ -70,7 +70,6 @@ class ReportsFragment : Fragment() {
                                     else Color.parseColor("#EF4444")
                                 )
 
-                                // Gráfico de pizza
                                 if (categoryTotals.isEmpty()) {
                                     pieChart.visibility = View.GONE
                                     tvCatBreakdown.text = "Nenhuma despesa registrada."
@@ -98,7 +97,7 @@ class ReportsFragment : Fragment() {
     }
 
     private fun setupPieChart(pieChart: PieChart, categoryTotals: Map<String, Double>) {
-        // Cores vibrantes para cada fatia
+       
         val colors = listOf(
             Color.parseColor("#6C63FF"),
             Color.parseColor("#10B981"),
@@ -141,7 +140,7 @@ class ReportsFragment : Fragment() {
                 formSize = 12f
                 xEntrySpace = 10f
             }
-            setDrawEntryLabels(false) // Deixa só a legenda, fica mais limpo
+            setDrawEntryLabels(false)
             animateY(800)
             invalidate()
         }
