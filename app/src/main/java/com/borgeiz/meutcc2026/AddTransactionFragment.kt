@@ -103,7 +103,7 @@ class AddTransactionFragment : Fragment() {
                 .child("users").child(currentUid).child("transactions")
             val key = ref.push().key ?: return@setOnClickListener
 
-            // Salva como objeto Transaction (não Map) para leitura correta com getValue()
+            
             val transaction = Transaction(
                 id          = key,
                 type        = spType.selectedItem.toString(),
