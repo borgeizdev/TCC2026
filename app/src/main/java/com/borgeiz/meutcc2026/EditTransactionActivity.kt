@@ -49,7 +49,6 @@ class EditTransactionActivity : AppCompatActivity() {
         val ref = FirebaseDatabase.getInstance().reference
             .child("users").child(uid).child("transactions").child(id)
 
-        // Carrega categorias e pré-seleciona a categoria atual
         FirebaseDatabase.getInstance().reference
             .child("users").child(uid).child("categories")
             .addListenerForSingleValueEvent(object : ValueEventListener {
@@ -66,7 +65,7 @@ class EditTransactionActivity : AppCompatActivity() {
                         android.R.layout.simple_spinner_dropdown_item,
                         cats
                     )
-                    // Pré-seleciona categoria existente
+                
                     val idx = cats.indexOfFirst { it.equals(category, ignoreCase = true) }
                     if (idx >= 0) spCategory.setSelection(idx)
                 }
@@ -93,7 +92,7 @@ class EditTransactionActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Salva como objeto Transaction para mapeamento correto
+
             val transaction = Transaction(
                 id          = id,
                 type        = type,
