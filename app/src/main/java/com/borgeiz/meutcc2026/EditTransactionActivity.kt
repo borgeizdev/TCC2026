@@ -1,5 +1,6 @@
 package com.borgeiz.meutcc2026
 
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -15,6 +16,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import java.util.Calendar
 
 class EditTransactionActivity : AppCompatActivity() {
 
@@ -43,13 +45,17 @@ class EditTransactionActivity : AppCompatActivity() {
         etDate.setText(intent.getStringExtra("date"))
         etDescription.setText(intent.getStringExtra("description"))
 
+        // DatePicker ao clicar no campo de data
+        etDate.isFocusable = false
+        etDate.isCursorVisible = false
+        etDate.setOnClickListener { showDatePicker(etDate) }
+
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
             finish(); return
         }
         val ref = FirebaseDatabase.getInstance().reference
             .child("users").child(uid).child("transactions").child(id)
 
-        // Carrega categorias e pré-seleciona a categoria atual
         FirebaseDatabase.getInstance().reference
             .child("users").child(uid).child("categories")
             .addListenerForSingleValueEvent(object : ValueEventListener {
@@ -66,7 +72,6 @@ class EditTransactionActivity : AppCompatActivity() {
                         android.R.layout.simple_spinner_dropdown_item,
                         cats
                     )
-                    // Pré-seleciona categoria existente
                     val idx = cats.indexOfFirst { it.equals(category, ignoreCase = true) }
                     if (idx >= 0) spCategory.setSelection(idx)
                 }
@@ -93,7 +98,6 @@ class EditTransactionActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Salva como objeto Transaction para mapeamento correto
             val transaction = Transaction(
                 id          = id,
                 type        = type,
@@ -125,5 +129,24 @@ class EditTransactionActivity : AppCompatActivity() {
                 .setNegativeButton("Cancelar", null)
                 .show()
         }
+    }
+
+    private fun showDatePicker(etDate: TextInputEditText) {
+        val current = etDate.text?.toString() ?: ""
+        val cal = Calendar.getInstance()
+        // Pré-preenche com a data atual do campo se válida
+        if (current.matches(Regex("\\d{4}-\\d{2}-\\d{2}"))) {
+            val parts = current.split("-")
+            cal.set(parts[0].toInt(), parts[1].toInt() - 1, parts[2].toInt())
+        }
+        DatePickerDialog(
+            this,
+            { _, year, month, day ->
+                etDate.setText("%04d-%02d-%02d".format(year, month + 1, day))
+            },
+            cal.get(Calendar.YEAR),
+            cal.get(Calendar.MONTH),
+            cal.get(Calendar.DAY_OF_MONTH)
+        ).show()
     }
 }

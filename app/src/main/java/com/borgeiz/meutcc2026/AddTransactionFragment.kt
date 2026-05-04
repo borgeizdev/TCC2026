@@ -1,5 +1,6 @@
 package com.borgeiz.meutcc2026
 
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +18,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import java.util.Calendar
 
 class AddTransactionFragment : Fragment() {
 
@@ -36,6 +38,11 @@ class AddTransactionFragment : Fragment() {
         val etDate        = view.findViewById<TextInputEditText>(R.id.etDate)
         val etDescription = view.findViewById<TextInputEditText>(R.id.etDescription)
         val btnSave       = view.findViewById<Button>(R.id.btnSaveTransaction)
+
+        // DatePicker ao clicar no campo de data
+        etDate.isFocusable = false
+        etDate.isCursorVisible = false
+        etDate.setOnClickListener { showDatePicker(etDate) }
 
         spType.adapter = ArrayAdapter(
             requireContext(),
@@ -103,7 +110,6 @@ class AddTransactionFragment : Fragment() {
                 .child("users").child(currentUid).child("transactions")
             val key = ref.push().key ?: return@setOnClickListener
 
-            // Salva como objeto Transaction (não Map) para leitura correta com getValue()
             val transaction = Transaction(
                 id          = key,
                 type        = spType.selectedItem.toString(),
@@ -128,5 +134,18 @@ class AddTransactionFragment : Fragment() {
         }
 
         return view
+    }
+
+    private fun showDatePicker(etDate: TextInputEditText) {
+        val cal = Calendar.getInstance()
+        DatePickerDialog(
+            requireContext(),
+            { _, year, month, day ->
+                etDate.setText("%04d-%02d-%02d".format(year, month + 1, day))
+            },
+            cal.get(Calendar.YEAR),
+            cal.get(Calendar.MONTH),
+            cal.get(Calendar.DAY_OF_MONTH)
+        ).show()
     }
 }
