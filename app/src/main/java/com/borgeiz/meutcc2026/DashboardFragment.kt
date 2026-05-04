@@ -22,7 +22,7 @@ class DashboardFragment : Fragment() {
     private lateinit var tvIncome: TextView
     private lateinit var tvExpense: TextView
 
-    // Saldo calculado pelas transações + ajuste manual salvo no Firebase
+
     private var transactionBalance = 0.0
     private var manualAdjustment   = 0.0
 
