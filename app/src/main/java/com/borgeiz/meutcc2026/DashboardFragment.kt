@@ -18,10 +18,10 @@ import com.google.firebase.database.ValueEventListener
 
 class DashboardFragment : Fragment() {
 
+    private lateinit var tvGreeting: TextView
     private lateinit var tvBalance: TextView
     private lateinit var tvIncome: TextView
     private lateinit var tvExpense: TextView
-
 
     private var transactionBalance = 0.0
     private var manualAdjustment   = 0.0
@@ -33,17 +33,31 @@ class DashboardFragment : Fragment() {
     ): View {
         val view = inflater.inflate(R.layout.fragment_dashboard, container, false)
 
-        tvBalance = view.findViewById(R.id.tvBalance)
-        tvIncome  = view.findViewById(R.id.tvIncome)
-        tvExpense = view.findViewById(R.id.tvExpense)
+        tvGreeting = view.findViewById(R.id.tvGreeting)
+        tvBalance  = view.findViewById(R.id.tvBalance)
+        tvIncome   = view.findViewById(R.id.tvIncome)
+        tvExpense  = view.findViewById(R.id.tvExpense)
 
+        loadUserName()
         loadManualAdjustment()
         loadSummary()
 
-        // Clique no saldo abre diálogo para ajustar
         tvBalance.setOnClickListener { showEditBalanceDialog() }
 
         return view
+    }
+
+    private fun loadUserName() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        FirebaseDatabase.getInstance().reference
+            .child("users").child(uid).child("profile").child("name")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val name = snapshot.getValue(String::class.java)?.trim() ?: ""
+                    tvGreeting.text = if (name.isNotBlank()) "Olá, $name! 👋" else "Olá! 👋"
+                }
+                override fun onCancelled(error: DatabaseError) {}
+            })
     }
 
     private fun loadManualAdjustment() {
@@ -67,13 +81,11 @@ class DashboardFragment : Fragment() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     var income  = 0.0
                     var expense = 0.0
-
                     for (item in snapshot.children) {
                         val t = item.getValue(Transaction::class.java) ?: continue
                         if (t.type == "receita") income  += t.amount
                         if (t.type == "despesa") expense += t.amount
                     }
-
                     transactionBalance = income - expense
                     tvIncome.text  = "R$ %.2f".format(income)
                     tvExpense.text = "R$ %.2f".format(expense)
@@ -95,7 +107,6 @@ class DashboardFragment : Fragment() {
     private fun showEditBalanceDialog() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val context = requireContext()
-
         val input = EditText(context).apply {
             hint = "Ex: 1500.00"
             inputType = android.text.InputType.TYPE_CLASS_NUMBER or
@@ -104,10 +115,9 @@ class DashboardFragment : Fragment() {
             setText(if (manualAdjustment != 0.0) "%.2f".format(manualAdjustment) else "")
             setPadding(48, 32, 48, 32)
         }
-
         AlertDialog.Builder(context)
             .setTitle("Ajustar saldo")
-            .setMessage("Informe um valor de ajuste manual (positivo ou negativo). Esse valor é somado ao saldo das transações.")
+            .setMessage("Informe um valor de ajuste manual (positivo ou negativo).")
             .setView(input)
             .setPositiveButton("Salvar") { _, _ ->
                 val value = input.text.toString().replace(",", ".").toDoubleOrNull()

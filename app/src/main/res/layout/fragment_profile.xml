@@ -156,9 +156,9 @@
                     android:layout_marginStart="16dp"
                     android:background="#F1F5F9" />
 
-                <!-- Salário -->
+                <!-- Configuracoes de Exibicao -->
                 <LinearLayout
-                    android:id="@+id/rowSalary"
+                    android:id="@+id/rowDisplayConf"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:orientation="horizontal"
@@ -172,7 +172,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="💼"
+                        android:text="🎨"
                         android:textSize="18sp"
                         android:layout_marginEnd="14dp" />
 
@@ -180,7 +180,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Salário"
+                        android:text="Configuracoes de exibicao"
                         android:textColor="#1E293B"
                         android:textSize="15sp" />
 

@@ -8,17 +8,21 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
-import com.borgeiz.meutcc2026.model.Category
 import com.borgeiz.meutcc2026.model.Transaction
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 
 class EditTransactionActivity : AppCompatActivity() {
 
-    private val defaultCategories = listOf("Alimentação", "Transporte", "Lazer", "Farmácia", "Salário")
+    private val incomeCategories = listOf(
+        "Salario", "Freelance", "Investimentos",
+        "Venda", "Presente", "Reembolso", "Outros"
+    )
+    private val expenseCategories = listOf(
+        "Alimentacao", "Transporte", "Moradia",
+        "Contas", "Saude", "Lazer",
+        "Educacao", "Compras", "Assinaturas", "Outros"
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,57 +47,27 @@ class EditTransactionActivity : AppCompatActivity() {
         etDate.setText(intent.getStringExtra("date"))
         etDescription.setText(intent.getStringExtra("description"))
 
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: run {
-            finish(); return
-        }
+        // Categorias conforme tipo
+        val cats = if (type == "receita") incomeCategories else expenseCategories
+        spCategory.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            cats
+        )
+        val idx = cats.indexOfFirst { it.equals(category, ignoreCase = true) }
+        if (idx >= 0) spCategory.setSelection(idx)
+
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: run { finish(); return }
         val ref = FirebaseDatabase.getInstance().reference
             .child("users").child(uid).child("transactions").child(id)
-
-        // Carrega categorias e pré-seleciona a categoria atual
-        FirebaseDatabase.getInstance().reference
-            .child("users").child(uid).child("categories")
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val cats = mutableListOf<String>()
-                    for (item in snapshot.children) {
-                        val cat = item.getValue(Category::class.java)
-                        if (cat != null && cat.name.isNotBlank()) cats.add(cat.name)
-                    }
-                    if (cats.isEmpty()) cats.addAll(defaultCategories)
-
-                    spCategory.adapter = ArrayAdapter(
-                        this@EditTransactionActivity,
-                        android.R.layout.simple_spinner_dropdown_item,
-                        cats
-                    )
-                    // Pré-seleciona categoria existente
-                    val idx = cats.indexOfFirst { it.equals(category, ignoreCase = true) }
-                    if (idx >= 0) spCategory.setSelection(idx)
-                }
-                override fun onCancelled(error: DatabaseError) {
-                    spCategory.adapter = ArrayAdapter(
-                        this@EditTransactionActivity,
-                        android.R.layout.simple_spinner_dropdown_item,
-                        defaultCategories
-                    )
-                }
-            })
 
         btnUpdate.setOnClickListener {
             val titleStr  = etTitle.text?.toString()?.trim() ?: ""
             val amountStr = etAmount.text?.toString()?.trim()?.replace(",", ".") ?: ""
-
-            if (titleStr.isEmpty()) {
-                etTitle.error = "Informe o título"
-                return@setOnClickListener
-            }
+            if (titleStr.isEmpty()) { etTitle.error = "Informe o titulo"; return@setOnClickListener }
             val amount = amountStr.toDoubleOrNull()
-            if (amount == null || amount <= 0.0) {
-                etAmount.error = "Informe um valor válido"
-                return@setOnClickListener
-            }
+            if (amount == null || amount <= 0.0) { etAmount.error = "Informe um valor valido"; return@setOnClickListener }
 
-            // Salva como objeto Transaction para mapeamento correto
             val transaction = Transaction(
                 id          = id,
                 type        = type,
@@ -103,7 +77,6 @@ class EditTransactionActivity : AppCompatActivity() {
                 date        = etDate.text?.toString()?.trim() ?: "",
                 description = etDescription.text?.toString()?.trim() ?: ""
             )
-
             ref.setValue(transaction).addOnSuccessListener {
                 Toast.makeText(this, "Atualizado!", Toast.LENGTH_SHORT).show()
                 finish()
@@ -114,11 +87,11 @@ class EditTransactionActivity : AppCompatActivity() {
 
         btnDelete.setOnClickListener {
             AlertDialog.Builder(this)
-                .setTitle("Excluir transação")
-                .setMessage("Tem certeza que deseja excluir esta transação?")
+                .setTitle("Excluir transacao")
+                .setMessage("Tem certeza que deseja excluir esta transacao?")
                 .setPositiveButton("Excluir") { _, _ ->
                     ref.removeValue().addOnSuccessListener {
-                        Toast.makeText(this, "Excluído!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Excluido!", Toast.LENGTH_SHORT).show()
                         finish()
                     }
                 }

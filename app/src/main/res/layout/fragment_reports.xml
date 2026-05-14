@@ -128,7 +128,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Card Gráfico de Pizza -->
+        <!-- Card Gráfico de Pizza com Filtro de Mês -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -141,18 +141,38 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="18dp">
-                <TextView
-                    android:layout_width="wrap_content"
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="🥧 Gastos por categoria"
-                    android:textColor="#1E293B"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="🥧 Gastos por categoria"
+                        android:textColor="#1E293B"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <Spinner
+                        android:id="@+id/spCatMonth"
+                        android:layout_width="140dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_spinner"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp" />
+
+                </LinearLayout>
+
                 <com.github.mikephil.charting.charts.PieChart
                     android:id="@+id/pieChart"
                     android:layout_width="match_parent"
                     android:layout_height="280dp" />
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -180,7 +200,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Toque em uma barra para ver o detalhe do mês"
+                    android:text="Barras verdes = Receitas · Vermelhas = Despesas"
                     android:textColor="#94A3B8"
                     android:textSize="12sp"
                     android:layout_marginBottom="12dp" />
@@ -206,7 +226,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📂 Detalhamento"
+                    android:text="📂 Detalhamento por categoria"
                     android:textColor="#1E293B"
                     android:textSize="15sp"
                     android:textStyle="bold"

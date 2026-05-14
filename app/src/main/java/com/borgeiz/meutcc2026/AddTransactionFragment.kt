@@ -4,23 +4,28 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.textfield.TextInputEditText
-import com.borgeiz.meutcc2026.model.Category
 import com.borgeiz.meutcc2026.model.Transaction
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 
 class AddTransactionFragment : Fragment() {
 
-    private val defaultCategories = listOf("Alimentação", "Transporte", "Lazer", "Farmácia", "Salário")
+    private val incomeCategories = listOf(
+        "Salario", "Freelance", "Investimentos",
+        "Venda", "Presente", "Reembolso", "Outros"
+    )
+    private val expenseCategories = listOf(
+        "Alimentacao", "Transporte", "Moradia",
+        "Contas", "Saude", "Lazer",
+        "Educacao", "Compras", "Assinaturas", "Outros"
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,67 +48,43 @@ class AddTransactionFragment : Fragment() {
             listOf("receita", "despesa")
         )
 
-        val uid = FirebaseAuth.getInstance().currentUser?.uid
-        if (uid != null) {
-            FirebaseDatabase.getInstance().reference
-                .child("users").child(uid).child("categories")
-                .addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        val cats = mutableListOf<String>()
-                        for (item in snapshot.children) {
-                            val cat = item.getValue(Category::class.java)
-                            if (cat != null && cat.name.isNotBlank()) cats.add(cat.name)
-                        }
-                        if (cats.isEmpty()) cats.addAll(defaultCategories)
-                        spCategory.adapter = ArrayAdapter(
-                            requireContext(),
-                            android.R.layout.simple_spinner_dropdown_item,
-                            cats
-                        )
-                    }
-                    override fun onCancelled(error: DatabaseError) {
-                        spCategory.adapter = ArrayAdapter(
-                            requireContext(),
-                            android.R.layout.simple_spinner_dropdown_item,
-                            defaultCategories
-                        )
-                    }
-                })
-        } else {
+        fun updateCategories(type: String) {
+            val cats = if (type == "receita") incomeCategories else expenseCategories
             spCategory.adapter = ArrayAdapter(
                 requireContext(),
                 android.R.layout.simple_spinner_dropdown_item,
-                defaultCategories
+                cats
             )
+        }
+
+        updateCategories("receita")
+
+        spType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                updateCategories(spType.getItemAtPosition(pos).toString())
+            }
+            override fun onNothingSelected(p: AdapterView<*>?) {}
         }
 
         btnSave.setOnClickListener {
             val currentUid = FirebaseAuth.getInstance().currentUser?.uid
             if (currentUid == null) {
-                Toast.makeText(requireContext(), "Usuário não autenticado", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Usuario nao autenticado", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-
             val titleStr  = etTitle.text?.toString()?.trim() ?: ""
             val amountStr = etAmount.text?.toString()?.trim()?.replace(",", ".") ?: ""
             val dateStr   = etDate.text?.toString()?.trim() ?: ""
             val descStr   = etDescription.text?.toString()?.trim() ?: ""
 
-            if (titleStr.isEmpty()) {
-                etTitle.error = "Informe o título"
-                return@setOnClickListener
-            }
+            if (titleStr.isEmpty()) { etTitle.error = "Informe o titulo"; return@setOnClickListener }
             val amount = amountStr.toDoubleOrNull()
-            if (amount == null || amount <= 0.0) {
-                etAmount.error = "Informe um valor válido"
-                return@setOnClickListener
-            }
+            if (amount == null || amount <= 0.0) { etAmount.error = "Informe um valor valido"; return@setOnClickListener }
 
             val ref = FirebaseDatabase.getInstance().reference
                 .child("users").child(currentUid).child("transactions")
             val key = ref.push().key ?: return@setOnClickListener
 
-            // Salva como objeto Transaction (não Map) para leitura correta com getValue()
             val transaction = Transaction(
                 id          = key,
                 type        = spType.selectedItem.toString(),
@@ -116,7 +97,7 @@ class AddTransactionFragment : Fragment() {
 
             ref.child(key).setValue(transaction)
                 .addOnSuccessListener {
-                    Toast.makeText(requireContext(), "Transação salva!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Transacao salva!", Toast.LENGTH_SHORT).show()
                     etTitle.text?.clear()
                     etAmount.text?.clear()
                     etDate.text?.clear()
