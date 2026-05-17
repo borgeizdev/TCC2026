@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8FAFC"
+    android:background="@color/bg_page"
     android:fillViewport="true">
 
     <LinearLayout
@@ -33,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="Bem-vindo de volta"
-                android:textColor="#1E293B"
+                android:textColor="@color/text_heading"
                 android:textSize="26sp"
                 android:textStyle="bold" />
 
@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Faça login para continuar"
-                android:textColor="#64748B"
+                android:textColor="@color/text_secondary"
                 android:textSize="14sp" />
 
         </LinearLayout>
@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             app:cardCornerRadius="20dp"
             app:cardElevation="4dp"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="@color/bg_card">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -114,7 +114,7 @@
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="24dp"
                     android:text="Esqueci minha senha"
-                    android:textColor="#6C63FF"
+                    android:textColor="@color/primary"
                     android:textSize="13sp"
                     android:clickable="true"
                     android:focusable="true" />
@@ -128,7 +128,7 @@
                     android:textSize="16sp"
                     android:textStyle="bold"
                     app:cornerRadius="12dp"
-                    app:backgroundTint="#6C63FF" />
+                    app:backgroundTint="@color/primary" />
 
             </LinearLayout>
 
@@ -146,7 +146,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Não tem conta? "
-                android:textColor="#64748B"
+                android:textColor="@color/text_secondary"
                 android:textSize="14sp" />
 
             <Button
@@ -154,7 +154,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Criar conta"
-                android:textColor="#6C63FF"
+                android:textColor="@color/primary"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:background="@null"

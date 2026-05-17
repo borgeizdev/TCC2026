@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8FAFC">
+    android:background="@color/bg_page">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,7 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Editar transação"
-            android:textColor="#1E293B"
+            android:textColor="@color/text_heading"
             android:textSize="22sp"
             android:textStyle="bold"
             android:layout_marginTop="8dp"
@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             app:cardCornerRadius="20dp"
             app:cardElevation="2dp"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="@color/bg_card">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -82,7 +82,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="CATEGORIA"
-                    android:textColor="#64748B"
+                    android:textColor="@color/text_secondary"
                     android:textSize="12sp"
                     android:textAllCaps="true"
                     android:letterSpacing="0.08"
@@ -150,7 +150,7 @@
                     android:textSize="16sp"
                     android:textStyle="bold"
                     app:cornerRadius="12dp"
-                    app:backgroundTint="#6C63FF" />
+                    app:backgroundTint="@color/primary" />
 
                 <View
                     android:layout_width="match_parent"
@@ -166,7 +166,7 @@
                     android:layout_height="52dp"
                     android:text="Excluir transação"
                     android:textSize="15sp"
-                    android:textColor="#EF4444"
+                    android:textColor="@color/expense"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     app:cornerRadius="12dp"
                     app:strokeColor="#FCA5A5"

@@ -1,7 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Meutcc2026" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+
+    <style name="Base.Theme.Meutcc2026" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/dark_primary</item>
+        <item name="colorPrimaryVariant">@color/dark_primary_hover</item>
+        <item name="colorOnPrimary">@color/dark_on_primary</item>
+        <item name="colorSecondary">@color/dark_primary</item>
+        <item name="colorOnSecondary">@color/dark_on_primary</item>
+        <item name="colorSurface">@color/dark_bg_card</item>
+        <item name="colorOnSurface">@color/dark_text_primary</item>
+        <item name="colorOutline">@color/dark_border</item>
+        <item name="android:colorBackground">@color/dark_bg_page</item>
+        <item name="android:windowBackground">@color/dark_bg_page</item>
+        <item name="android:statusBarColor">@color/dark_bg_page</item>
+        <item name="android:navigationBarColor">@color/dark_bg_card</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
     </style>
+
 </resources>

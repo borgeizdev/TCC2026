@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- DARK MODE — salvar em res/values-night/colors.xml -->
+
+    <color name="bg_page">#0F172A</color>
+    <color name="bg_card">#1E293B</color>
+    <color name="bg_card_subtle">#172033</color>
+    <color name="bg_input">#172033</color>
+
+    <!-- Azul escuro mais próximo do light, sem ciano chocante -->
+    <color name="primary">#3B82F6</color>
+    <color name="primary_dark">#2563EB</color>
+    <color name="primary_hover">#2563EB</color>
+    <color name="primary_light">#1E3A5F</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="primary_text_subtle">#93C5FD</color>
+
+    <color name="text_heading">#F1F5F9</color>
+    <color name="text_primary">#F1F5F9</color>
+    <color name="text_body">#F1F5F9</color>
+    <color name="text_secondary">#94A3B8</color>
+    <color name="text_hint">#64748B</color>
+
+    <color name="border">#2D3748</color>
+    <color name="divider">#2D3748</color>
+
+    <color name="income">#22C55E</color>
+    <color name="income_bg">#052E16</color>
+    <color name="income_text">#86EFAC</color>
+
+    <color name="expense">#F87171</color>
+    <color name="expense_bg">#3B0000</color>
+    <color name="expense_text">#FECACA</color>
+
+    <!-- aliases usados no themes.xml night -->
+    <color name="dark_primary">#3B82F6</color>
+    <color name="dark_primary_hover">#2563EB</color>
+    <color name="dark_on_primary">#FFFFFF</color>
+    <color name="dark_bg_card">#1E293B</color>
+    <color name="dark_bg_page">#0F172A</color>
+    <color name="dark_text_primary">#F1F5F9</color>
+    <color name="dark_border">#2D3748</color>
+
+</resources>

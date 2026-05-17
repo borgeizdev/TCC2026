@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8FAFC"
+    android:background="@color/bg_page"
     android:orientation="vertical">
 
     <!-- Cabeçalho -->
@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Transações"
-            android:textColor="#1E293B"
+            android:textColor="@color/text_heading"
             android:textSize="22sp"
             android:textStyle="bold" />
 
@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="Histórico completo"
-            android:textColor="#94A3B8"
+            android:textColor="@color/text_hint"
             android:textSize="13sp" />
 
     </LinearLayout>
@@ -69,7 +69,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Nenhuma transação encontrada."
-        android:textColor="#94A3B8"
+        android:textColor="@color/text_hint"
         android:textSize="14sp"
         android:gravity="center"
         android:paddingTop="40dp"

@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="Controle suas finanças"
-        android:textColor="#94A3B8"
+        android:textColor="@color/text_hint"
         android:textSize="14sp" />
 
     <ProgressBar

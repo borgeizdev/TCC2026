@@ -9,6 +9,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.borgeiz.meutcc2026.model.Transaction
 import com.github.mikephil.charting.charts.BarChart
@@ -16,7 +17,6 @@ import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.github.mikephil.charting.formatter.PercentFormatter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -54,7 +54,6 @@ class ReportsFragment : Fragment() {
         val barChart       = view.findViewById<BarChart>(R.id.barChart)
         val spCatMonth     = view.findViewById<Spinner>(R.id.spCatMonth)
 
-        // Spinner de mês para gastos por categoria
         spCatMonth.adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_dropdown_item,
@@ -94,7 +93,6 @@ class ReportsFragment : Fragment() {
 
                 val sb = StringBuilder()
                 for ((cat, value) in categoryTotals.entries.sortedByDescending { it.value }) {
-                    // Porcentagem sem arredondamento para 0 — usa 1 casa decimal
                     val pct = if (filteredExpenseTotal > 0) (value / filteredExpenseTotal * 100) else 0.0
                     val pctStr = if (pct < 1.0 && pct > 0.0) "%.1f".format(pct) else pct.toInt().toString()
                     sb.appendLine("$cat — R$ ${"%.2f".format(value)} ($pctStr%)")
@@ -134,15 +132,8 @@ class ReportsFragment : Fragment() {
                                 tvIncome.text  = "R$ %.2f".format(totalIncome)
                                 tvExpense.text = "R$ %.2f".format(totalExpense)
                                 tvBalance.text = "R$ %.2f".format(balance)
-                                tvBalance.setTextColor(
-                                    if (balance >= 0) Color.parseColor("#22C55E")
-                                    else Color.parseColor("#EF4444")
-                                )
 
-                                // Gráfico de barras mensal
                                 setupBarChart(barChart, txList)
-
-                                // Gráfico de pizza com filtro de mês atual
                                 refreshCategoryChart(spCatMonth.selectedItemPosition)
                             }
                             override fun onCancelled(error: DatabaseError) {}
@@ -155,12 +146,18 @@ class ReportsFragment : Fragment() {
     }
 
     private fun setupPieChart(pieChart: PieChart, categoryTotals: Map<String, Double>) {
+        // Paleta profissional, sem cores berrantes
         val colors = listOf(
-            Color.parseColor("#6C63FF"), Color.parseColor("#10B981"),
-            Color.parseColor("#F59E0B"), Color.parseColor("#EF4444"),
-            Color.parseColor("#3B82F6"), Color.parseColor("#EC4899"),
-            Color.parseColor("#8B5CF6"), Color.parseColor("#14B8A6"),
-            Color.parseColor("#F97316"), Color.parseColor("#84CC16")
+            Color.parseColor("#2563EB"), // azul primário
+            Color.parseColor("#16A34A"), // verde
+            Color.parseColor("#D97706"), // âmbar
+            Color.parseColor("#DC2626"), // vermelho
+            Color.parseColor("#7C3AED"), // violeta
+            Color.parseColor("#0891B2"), // ciano
+            Color.parseColor("#059669"), // esmeralda
+            Color.parseColor("#B45309"), // marrom
+            Color.parseColor("#4F46E5"), // índigo
+            Color.parseColor("#BE185D")  // rosa escuro
         )
 
         val entries = categoryTotals.entries
@@ -171,40 +168,46 @@ class ReportsFragment : Fragment() {
             this.colors = colors.take(entries.size).toMutableList()
             valueTextSize = 11f
             valueTextColor = Color.WHITE
-            // Formata a porcentagem sem arredondar para 0
             valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
                 override fun getFormattedValue(value: Float): String {
                     return if (value < 1f && value > 0f) "${"%.1f".format(value)}%" else "${value.toInt()}%"
                 }
             }
-            sliceSpace = 3f
+            sliceSpace = 2f
         }
+
+        // Detecta modo escuro pelo contexto
+        val isDark = (resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+        val holeColor    = if (isDark) Color.parseColor("#1E293B") else Color.WHITE
+        val legendColor  = if (isDark) Color.parseColor("#94A3B8") else Color.parseColor("#374151")
 
         pieChart.apply {
             data = PieData(dataSet)
             description.isEnabled = false
             isDrawHoleEnabled = true
-            holeRadius = 42f
-            transparentCircleRadius = 47f
-            setHoleColor(Color.WHITE)
+            holeRadius = 44f
+            transparentCircleRadius = 48f
+            setHoleColor(holeColor)
             setUsePercentValues(true)
-            setEntryLabelColor(Color.DKGRAY)
-            setEntryLabelTextSize(11f)
+            setEntryLabelColor(Color.TRANSPARENT)
+            setDrawEntryLabels(false)
             legend.apply {
                 isEnabled = true
                 textSize = 12f
-                textColor = Color.parseColor("#475569")
+                textColor = legendColor
                 formSize = 12f
                 xEntrySpace = 10f
             }
-            setDrawEntryLabels(false)
             animateY(800)
             invalidate()
         }
     }
 
     private fun setupBarChart(barChart: BarChart, transactions: List<Transaction>) {
-        // Agrupa por mês (yyyy-MM)
+        // Agrupa por mês numérico
         val monthlyIncome  = mutableMapOf<Int, Float>()
         val monthlyExpense = mutableMapOf<Int, Float>()
 
@@ -223,56 +226,84 @@ class ReportsFragment : Fragment() {
         }
         barChart.visibility = View.VISIBLE
 
+        // ── CORREÇÃO DO BUG ──
+        // Cada grupo ocupa 2.5f de espaço. As duas barras ficam em 0f e 1f dentro
+        // do grupo. groupBars() reposiciona tudo automaticamente.
+        val groupSpace = 0.4f
+        val barSpace   = 0.05f
+        val barWidth   = 0.25f  // 2 * barWidth + 2 * barSpace + groupSpace = 1.0f ✓
+        // 2*0.25 + 2*0.05 + 0.4 = 1.0 ✓
+
         val incomeEntries  = mutableListOf<BarEntry>()
         val expenseEntries = mutableListOf<BarEntry>()
-        val labels = mutableListOf<String>()
+        val labels         = mutableListOf<String>()
 
         allMonths.forEachIndexed { idx, month ->
-            incomeEntries.add(BarEntry(idx.toFloat() * 2f,       monthlyIncome[month]  ?: 0f))
-            expenseEntries.add(BarEntry(idx.toFloat() * 2f + 0.8f, monthlyExpense[month] ?: 0f))
+            incomeEntries.add(BarEntry(idx.toFloat(), monthlyIncome[month]  ?: 0f))
+            expenseEntries.add(BarEntry(idx.toFloat(), monthlyExpense[month] ?: 0f))
             labels.add(monthLabels.getOrElse(month) { "$month" })
         }
 
+        val isDark = (resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val axisTextColor  = if (isDark) Color.parseColor("#94A3B8") else Color.parseColor("#6B7280")
+        val axisGridColor  = if (isDark) Color.parseColor("#2D3748") else Color.parseColor("#E5E7EB")
+
         val incomeSet = BarDataSet(incomeEntries, "Receitas").apply {
-            color = Color.parseColor("#10B981")
+            color = Color.parseColor("#16A34A")
             valueTextSize = 9f
+            valueTextColor = axisTextColor
             valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
                 override fun getFormattedValue(value: Float) = if (value == 0f) "" else "R$${value.toInt()}"
             }
         }
         val expenseSet = BarDataSet(expenseEntries, "Despesas").apply {
-            color = Color.parseColor("#EF4444")
+            color = Color.parseColor("#DC2626")
             valueTextSize = 9f
+            valueTextColor = axisTextColor
             valueFormatter = object : com.github.mikephil.charting.formatter.ValueFormatter() {
                 override fun getFormattedValue(value: Float) = if (value == 0f) "" else "R$${value.toInt()}"
             }
         }
 
+        val barData = BarData(incomeSet, expenseSet).apply {
+            this.barWidth = barWidth
+        }
+
+        // axisMaximum calculado manualmente: (barWidth * 2 + barSpace * 2 + groupSpace) * nGrupos
+        val groupWidthVal = barWidth * 2 + barSpace * 2 + groupSpace
+
         barChart.apply {
-            data = BarData(incomeSet, expenseSet).apply { barWidth = 0.75f }
+            data = barData
+
+            // groupBars precisa ser chamado DEPOIS de setar os dados
+            // fromX = 0f, groupSpace, barSpace — agrupa as barras corretamente
+            barData.groupBars(0f, groupSpace, barSpace)
+
             description.isEnabled = false
             setFitBars(true)
+
             xAxis.apply {
-                valueFormatter = IndexAxisValueFormatter(
-                    allMonths.mapIndexed { idx, month ->
-                        // Labels posicionados no meio dos dois grupos
-                        monthLabels.getOrElse(month) { "$month" }
-                    }
-                )
+                // O centro de cada grupo fica em idx + 0.5f (metade do espaço de 1.0)
+                valueFormatter = IndexAxisValueFormatter(labels)
                 position = XAxis.XAxisPosition.BOTTOM
                 setCenterAxisLabels(true)
-                granularity = 2f
+                granularity = 1f
+                axisMinimum = 0f
+                axisMaximum = groupWidthVal * allMonths.size
                 setDrawGridLines(false)
                 textSize = 11f
-                textColor = Color.parseColor("#475569")
+                textColor = axisTextColor
             }
             axisLeft.apply {
                 axisMinimum = 0f
-                textColor = Color.parseColor("#475569")
-                gridColor = Color.parseColor("#F1F5F9")
+                textColor = axisTextColor
+                gridColor = axisGridColor
             }
             axisRight.isEnabled = false
-            legend.textColor = Color.parseColor("#475569")
+            legend.textColor = axisTextColor
+            setBackgroundColor(Color.TRANSPARENT)
             animateY(600)
             invalidate()
         }
