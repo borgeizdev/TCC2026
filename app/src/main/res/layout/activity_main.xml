@@ -18,11 +18,10 @@
         android:layout_height="1dp"
         android:background="@color/border" />
 
-    <!-- Barra de navegação inferior -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
-        android:layout_height="68dp"
+        android:layout_height="64dp"
         android:background="@color/bg_card"
         android:orientation="horizontal"
         android:weightSum="5">
@@ -39,18 +38,18 @@
             android:focusable="true"
             android:background="?attr/selectableItemBackground">
 
-            <TextView
+            <ImageView
                 android:id="@+id/iconDashboard"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🏠"
-                android:textSize="20sp" />
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_home"
+                app:tint="@color/primary" />
 
             <TextView
                 android:id="@+id/labelDashboard"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="4dp"
                 android:text="Home"
                 android:textColor="@color/primary"
                 android:textSize="9sp"
@@ -69,18 +68,18 @@
             android:focusable="true"
             android:background="?attr/selectableItemBackground">
 
-            <TextView
+            <ImageView
                 android:id="@+id/iconTransactions"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📋"
-                android:textSize="20sp" />
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_list"
+                app:tint="@color/text_hint" />
 
             <TextView
                 android:id="@+id/labelTransactions"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="4dp"
                 android:text="Transações"
                 android:textColor="@color/text_hint"
                 android:textSize="9sp" />
@@ -102,8 +101,9 @@
                 android:contentDescription="Nova transação"
                 app:backgroundTint="@color/primary"
                 app:tint="@color/on_primary"
-                app:fabSize="mini"
-                app:elevation="6dp" />
+                app:fabCustomSize="44dp"
+                app:maxImageSize="20dp"
+                app:elevation="4dp" />
         </LinearLayout>
 
         <!-- Relatórios -->
@@ -118,18 +118,18 @@
             android:focusable="true"
             android:background="?attr/selectableItemBackground">
 
-            <TextView
+            <ImageView
                 android:id="@+id/iconReports"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📊"
-                android:textSize="20sp" />
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_bar_chart"
+                app:tint="@color/text_hint" />
 
             <TextView
                 android:id="@+id/labelReports"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="4dp"
                 android:text="Relatórios"
                 android:textColor="@color/text_hint"
                 android:textSize="9sp" />
@@ -147,18 +147,18 @@
             android:focusable="true"
             android:background="?attr/selectableItemBackground">
 
-            <TextView
+            <ImageView
                 android:id="@+id/iconProfile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="👤"
-                android:textSize="20sp" />
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/ic_person"
+                app:tint="@color/text_hint" />
 
             <TextView
                 android:id="@+id/labelProfile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="4dp"
                 android:text="Perfil"
                 android:textColor="@color/text_hint"
                 android:textSize="9sp" />

@@ -125,7 +125,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Card Gráfico de Pizza com Filtro de Mês -->
+        <!-- Card Gastos por categoria + breakdown (legenda integrada) -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -139,6 +139,7 @@
                 android:orientation="vertical"
                 android:padding="18dp">
 
+                <!-- Título + filtro de mês -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -165,10 +166,26 @@
 
                 </LinearLayout>
 
+                <!-- Gráfico de pizza (sem legenda) -->
                 <com.github.mikephil.charting.charts.PieChart
                     android:id="@+id/pieChart"
                     android:layout_width="match_parent"
-                    android:layout_height="280dp" />
+                    android:layout_height="260dp" />
+
+                <!-- Divisor entre gráfico e detalhamento -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@color/divider" />
+
+                <!-- Detalhamento por categoria (serve como legenda) -->
+                <LinearLayout
+                    android:id="@+id/llCatBreakdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -205,37 +222,6 @@
                     android:id="@+id/barChart"
                     android:layout_width="match_parent"
                     android:layout_height="280dp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Card Breakdown por categoria -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
-            app:cardBackgroundColor="@color/bg_card">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="18dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Detalhamento por categoria"
-                    android:textColor="@color/text_heading"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp" />
-                <TextView
-                    android:id="@+id/tvCatBreakdown"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Carregando..."
-                    android:textColor="@color/text_body"
-                    android:textSize="14sp"
-                    android:lineSpacingExtra="6dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

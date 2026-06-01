@@ -18,4 +18,17 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
     </style>
 
+    <style name="Theme.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#1A1A2E</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_icon</item>
+        <item name="windowSplashScreenIconBackgroundColor">#1A1A2E</item>
+        <item name="postSplashScreenTheme">@style/Theme.SplashContent</item>
+    </style>
+
+    <style name="Theme.SplashContent" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">#1A1A2E</item>
+        <item name="android:statusBarColor">#1A1A2E</item>
+        <item name="android:navigationBarColor">#1A1A2E</item>
+    </style>
+
 </resources>

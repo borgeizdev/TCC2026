@@ -1,5 +1,6 @@
 package com.borgeiz.meutcc2026
 
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -11,6 +12,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.borgeiz.meutcc2026.model.Transaction
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import java.util.Calendar
 
 class EditTransactionActivity : AppCompatActivity() {
 
@@ -46,6 +48,23 @@ class EditTransactionActivity : AppCompatActivity() {
         })
         etDate.setText(intent.getStringExtra("date"))
         etDescription.setText(intent.getStringExtra("description"))
+
+        etDate.setOnClickListener {
+            val parts = etDate.text?.toString()?.split("-")
+            val cal = Calendar.getInstance()
+            if (parts != null && parts.size == 3) {
+                parts[0].toIntOrNull()?.let { cal.set(Calendar.YEAR, it) }
+                parts[1].toIntOrNull()?.let { cal.set(Calendar.MONTH, it - 1) }
+                parts[2].toIntOrNull()?.let { cal.set(Calendar.DAY_OF_MONTH, it) }
+            }
+            DatePickerDialog(
+                this,
+                { _, y, m, d -> etDate.setText("%d-%02d-%02d".format(y, m + 1, d)) },
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH),
+                cal.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
 
         // Categorias conforme tipo
         val cats = if (type == "receita") incomeCategories else expenseCategories
@@ -97,6 +116,14 @@ class EditTransactionActivity : AppCompatActivity() {
                 }
                 .setNegativeButton("Cancelar", null)
                 .show()
+                .also { d ->
+                    d.window?.setBackgroundDrawable(
+                        android.graphics.drawable.GradientDrawable().apply {
+                            setColor(getColor(R.color.bg_card))
+                            cornerRadius = 20 * resources.displayMetrics.density
+                        }
+                    )
+                }
         }
     }
 }

@@ -1,12 +1,16 @@
 package com.borgeiz.meutcc2026
 
 import android.graphics.Color
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -39,6 +43,12 @@ class ReportsFragment : Fragment() {
         "Setembro", "Outubro", "Novembro", "Dezembro"
     )
 
+    private val paletteHex = listOf(
+        "#2563EB", "#16A34A", "#D97706", "#DC2626",
+        "#7C3AED", "#0891B2", "#059669", "#B45309",
+        "#4F46E5", "#BE185D"
+    )
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -46,13 +56,13 @@ class ReportsFragment : Fragment() {
     ): View {
         val view = inflater.inflate(R.layout.fragment_reports, container, false)
 
-        val tvIncome       = view.findViewById<TextView>(R.id.tvIncome)
-        val tvExpense      = view.findViewById<TextView>(R.id.tvExpense)
-        val tvBalance      = view.findViewById<TextView>(R.id.tvBalance)
-        val tvCatBreakdown = view.findViewById<TextView>(R.id.tvCatBreakdown)
-        val pieChart       = view.findViewById<PieChart>(R.id.pieChart)
-        val barChart       = view.findViewById<BarChart>(R.id.barChart)
-        val spCatMonth     = view.findViewById<Spinner>(R.id.spCatMonth)
+        val tvIncome        = view.findViewById<TextView>(R.id.tvIncome)
+        val tvExpense       = view.findViewById<TextView>(R.id.tvExpense)
+        val tvBalance       = view.findViewById<TextView>(R.id.tvBalance)
+        val llCatBreakdown  = view.findViewById<LinearLayout>(R.id.llCatBreakdown)
+        val pieChart        = view.findViewById<PieChart>(R.id.pieChart)
+        val barChart        = view.findViewById<BarChart>(R.id.barChart)
+        val spCatMonth      = view.findViewById<Spinner>(R.id.spCatMonth)
 
         spCatMonth.adapter = ArrayAdapter(
             requireContext(),
@@ -61,6 +71,9 @@ class ReportsFragment : Fragment() {
         )
         val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
         spCatMonth.setSelection(currentMonth)
+
+        pieChart.setNoDataText("")
+        barChart.setNoDataText("")
 
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return view
         val db  = FirebaseDatabase.getInstance().reference.child("users").child(uid)
@@ -86,18 +99,16 @@ class ReportsFragment : Fragment() {
 
             if (categoryTotals.isEmpty()) {
                 pieChart.visibility = View.GONE
-                tvCatBreakdown.text = "Nenhuma despesa registrada para este período."
+                llCatBreakdown.removeAllViews()
+                llCatBreakdown.addView(TextView(requireContext()).apply {
+                    text = "Nenhuma despesa registrada para este período."
+                    setTextColor(ContextCompat.getColor(requireContext(), R.color.text_hint))
+                    textSize = 14f
+                })
             } else {
                 pieChart.visibility = View.VISIBLE
                 setupPieChart(pieChart, categoryTotals)
-
-                val sb = StringBuilder()
-                for ((cat, value) in categoryTotals.entries.sortedByDescending { it.value }) {
-                    val pct = if (filteredExpenseTotal > 0) (value / filteredExpenseTotal * 100) else 0.0
-                    val pctStr = if (pct < 1.0 && pct > 0.0) "%.1f".format(pct) else pct.toInt().toString()
-                    sb.appendLine("$cat — R$ ${"%.2f".format(value)} ($pctStr%)")
-                }
-                tvCatBreakdown.text = sb.toString().trimEnd()
+                buildCategoryRows(llCatBreakdown, categoryTotals, filteredExpenseTotal)
             }
         }
 
@@ -145,20 +156,159 @@ class ReportsFragment : Fragment() {
         return view
     }
 
+    private fun buildCategoryRows(
+        container: LinearLayout,
+        categoryTotals: Map<String, Double>,
+        total: Double
+    ) {
+        container.removeAllViews()
+        val ctx = requireContext()
+        val dp  = ctx.resources.displayMetrics.density
+
+        val isDark = (resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+        val trackColor   = if (isDark) Color.parseColor("#1E293B") else Color.parseColor("#E2E8F0")
+        val dividerColor = if (isDark) Color.parseColor("#1E293B") else Color.parseColor("#F1F5F9")
+        val nameColor    = ContextCompat.getColor(ctx, R.color.text_heading)
+        val amtColor     = ContextCompat.getColor(ctx, R.color.text_secondary)
+
+        val sorted = categoryTotals.entries.sortedByDescending { it.value }
+
+        sorted.forEachIndexed { idx, (cat, value) ->
+            val pct    = if (total > 0) (value / total * 100.0) else 0.0
+            val color  = Color.parseColor(paletteHex[idx % paletteHex.size])
+            val pctStr = if (pct < 1.0 && pct > 0.0) "${"%.1f".format(pct)}%" else "${pct.toInt()}%"
+            val isLast = idx == sorted.size - 1
+
+            // ── Row container (vertical) ──────────────────────────────────────
+            val row = LinearLayout(ctx).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    if (!isLast) bottomMargin = (4 * dp).toInt()
+                }
+            }
+
+            // ── Top line: dot · name · amount · pct ──────────────────────────
+            val topRow = LinearLayout(ctx).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            }
+
+            val dot = View(ctx).apply {
+                val size = (10 * dp).toInt()
+                layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                    marginEnd = (10 * dp).toInt()
+                    topMargin = (2 * dp).toInt()
+                }
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.OVAL
+                    setColor(color)
+                }
+            }
+
+            val tvName = TextView(ctx).apply {
+                text = cat
+                textSize = 14f
+                setTextColor(nameColor)
+                setTypeface(null, Typeface.BOLD)
+                layoutParams = LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+                )
+            }
+
+            val tvAmt = TextView(ctx).apply {
+                text = "R$ ${"%.2f".format(value)}"
+                textSize = 13f
+                setTextColor(amtColor)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { marginStart = (10 * dp).toInt() }
+            }
+
+            val tvPct = TextView(ctx).apply {
+                text = pctStr
+                textSize = 12f
+                setTextColor(color)
+                setTypeface(null, Typeface.BOLD)
+                gravity = Gravity.END
+                layoutParams = LinearLayout.LayoutParams(
+                    (40 * dp).toInt(), LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { marginStart = (6 * dp).toInt() }
+            }
+
+            topRow.addView(dot)
+            topRow.addView(tvName)
+            topRow.addView(tvAmt)
+            topRow.addView(tvPct)
+
+            // ── Progress bar ──────────────────────────────────────────────────
+            val track = LinearLayout(ctx).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    (6 * dp).toInt()
+                ).apply { topMargin = (8 * dp).toInt() }
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 3 * dp
+                    setColor(trackColor)
+                }
+            }
+
+            val fill = View(ctx).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.MATCH_PARENT,
+                    pct.toFloat().coerceAtLeast(1f)
+                )
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 3 * dp
+                    setColor(color)
+                }
+            }
+            val rest = View(ctx).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.MATCH_PARENT,
+                    (100.0 - pct).toFloat().coerceAtLeast(0f)
+                )
+            }
+            track.addView(fill)
+            track.addView(rest)
+
+            row.addView(topRow)
+            row.addView(track)
+
+            // ── Divider ───────────────────────────────────────────────────────
+            if (!isLast) {
+                val divider = View(ctx).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        (1 * dp).toInt()
+                    ).apply {
+                        topMargin    = (14 * dp).toInt()
+                        bottomMargin = (14 * dp).toInt()
+                    }
+                    setBackgroundColor(dividerColor)
+                }
+                row.addView(divider)
+            }
+
+            container.addView(row)
+        }
+    }
+
     private fun setupPieChart(pieChart: PieChart, categoryTotals: Map<String, Double>) {
-        // Paleta profissional, sem cores berrantes
-        val colors = listOf(
-            Color.parseColor("#2563EB"), // azul primário
-            Color.parseColor("#16A34A"), // verde
-            Color.parseColor("#D97706"), // âmbar
-            Color.parseColor("#DC2626"), // vermelho
-            Color.parseColor("#7C3AED"), // violeta
-            Color.parseColor("#0891B2"), // ciano
-            Color.parseColor("#059669"), // esmeralda
-            Color.parseColor("#B45309"), // marrom
-            Color.parseColor("#4F46E5"), // índigo
-            Color.parseColor("#BE185D")  // rosa escuro
-        )
+        val colors = paletteHex.map { Color.parseColor(it) }
 
         val entries = categoryTotals.entries
             .sortedByDescending { it.value }
@@ -176,38 +326,29 @@ class ReportsFragment : Fragment() {
             sliceSpace = 2f
         }
 
-        // Detecta modo escuro pelo contexto
         val isDark = (resources.configuration.uiMode and
                 android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
                 android.content.res.Configuration.UI_MODE_NIGHT_YES
 
-        val holeColor    = if (isDark) Color.parseColor("#1E293B") else Color.WHITE
-        val legendColor  = if (isDark) Color.parseColor("#94A3B8") else Color.parseColor("#374151")
+        val holeColor = if (isDark) Color.parseColor("#1E293B") else Color.WHITE
 
         pieChart.apply {
             data = PieData(dataSet)
             description.isEnabled = false
             isDrawHoleEnabled = true
             holeRadius = 44f
-            transparentCircleRadius = 48f
+            transparentCircleRadius = 0f
             setHoleColor(holeColor)
             setUsePercentValues(true)
             setEntryLabelColor(Color.TRANSPARENT)
             setDrawEntryLabels(false)
-            legend.apply {
-                isEnabled = true
-                textSize = 12f
-                textColor = legendColor
-                formSize = 12f
-                xEntrySpace = 10f
-            }
+            legend.isEnabled = false
             animateY(800)
             invalidate()
         }
     }
 
     private fun setupBarChart(barChart: BarChart, transactions: List<Transaction>) {
-        // Agrupa por mês numérico
         val monthlyIncome  = mutableMapOf<Int, Float>()
         val monthlyExpense = mutableMapOf<Int, Float>()
 
@@ -226,13 +367,9 @@ class ReportsFragment : Fragment() {
         }
         barChart.visibility = View.VISIBLE
 
-        // ── CORREÇÃO DO BUG ──
-        // Cada grupo ocupa 2.5f de espaço. As duas barras ficam em 0f e 1f dentro
-        // do grupo. groupBars() reposiciona tudo automaticamente.
         val groupSpace = 0.4f
         val barSpace   = 0.05f
-        val barWidth   = 0.25f  // 2 * barWidth + 2 * barSpace + groupSpace = 1.0f ✓
-        // 2*0.25 + 2*0.05 + 0.4 = 1.0 ✓
+        val barWidth   = 0.25f
 
         val incomeEntries  = mutableListOf<BarEntry>()
         val expenseEntries = mutableListOf<BarEntry>()
@@ -247,8 +384,8 @@ class ReportsFragment : Fragment() {
         val isDark = (resources.configuration.uiMode and
                 android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
                 android.content.res.Configuration.UI_MODE_NIGHT_YES
-        val axisTextColor  = if (isDark) Color.parseColor("#94A3B8") else Color.parseColor("#6B7280")
-        val axisGridColor  = if (isDark) Color.parseColor("#2D3748") else Color.parseColor("#E5E7EB")
+        val axisTextColor = if (isDark) Color.parseColor("#94A3B8") else Color.parseColor("#6B7280")
+        val axisGridColor = if (isDark) Color.parseColor("#2D3748") else Color.parseColor("#E5E7EB")
 
         val incomeSet = BarDataSet(incomeEntries, "Receitas").apply {
             color = Color.parseColor("#16A34A")
@@ -267,25 +404,15 @@ class ReportsFragment : Fragment() {
             }
         }
 
-        val barData = BarData(incomeSet, expenseSet).apply {
-            this.barWidth = barWidth
-        }
-
-        // axisMaximum calculado manualmente: (barWidth * 2 + barSpace * 2 + groupSpace) * nGrupos
+        val barData = BarData(incomeSet, expenseSet).apply { this.barWidth = barWidth }
         val groupWidthVal = barWidth * 2 + barSpace * 2 + groupSpace
 
         barChart.apply {
             data = barData
-
-            // groupBars precisa ser chamado DEPOIS de setar os dados
-            // fromX = 0f, groupSpace, barSpace — agrupa as barras corretamente
             barData.groupBars(0f, groupSpace, barSpace)
-
             description.isEnabled = false
             setFitBars(true)
-
             xAxis.apply {
-                // O centro de cada grupo fica em idx + 0.5f (metade do espaço de 1.0)
                 valueFormatter = IndexAxisValueFormatter(labels)
                 position = XAxis.XAxisPosition.BOTTOM
                 setCenterAxisLabels(true)

@@ -114,8 +114,10 @@
                         android:id="@+id/etEditDate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="date"
-                        android:imeOptions="actionNext" />
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:inputType="none" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 

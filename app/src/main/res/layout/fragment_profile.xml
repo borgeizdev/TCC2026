@@ -27,7 +27,6 @@
                 android:gravity="center_horizontal"
                 android:padding="32dp">
 
-                <!-- Avatar circular com inicial do nome -->
                 <TextView
                     android:id="@+id/tvProfileAvatar"
                     android:layout_width="72dp"
@@ -113,7 +112,7 @@
                     android:layout_marginStart="16dp"
                     android:background="#F1F5F9" />
 
-                <!-- Configurações -->
+                <!-- Configurações (submenu) -->
                 <LinearLayout
                     android:id="@+id/rowSettings"
                     android:layout_width="match_parent"
@@ -148,47 +147,6 @@
                         android:textSize="20sp" />
                 </LinearLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="16dp"
-                    android:background="#F1F5F9" />
-
-                <!-- Configuracoes de Exibicao -->
-                <LinearLayout
-                    android:id="@+id/rowDisplayConf"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:background="?attr/selectableItemBackground">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="18sp"
-                        android:layout_marginEnd="14dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Configuracoes de exibicao"
-                        android:textColor="@color/text_heading"
-                        android:textSize="15sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="›"
-                        android:textColor="#CBD5E1"
-                        android:textSize="20sp" />
-                </LinearLayout>
-
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -202,9 +160,9 @@
             android:textSize="15sp"
             android:textColor="@color/expense"
             app:cornerRadius="16dp"
-            app:backgroundTint="#FEF2F2"
+            app:backgroundTint="@color/logout_bg"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            app:strokeColor="#FECACA"
+            app:strokeColor="@color/logout_stroke"
             app:strokeWidth="1dp" />
 
     </LinearLayout>

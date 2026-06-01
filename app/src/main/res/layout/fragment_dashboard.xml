@@ -33,11 +33,11 @@
             android:layout_marginTop="2dp"
             android:layout_marginBottom="20dp" />
 
-        <!-- Card de saldo principal -->
+        <!-- Card saldo principal -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="12dp"
             app:cardCornerRadius="20dp"
             app:cardElevation="0dp"
             app:cardBackgroundColor="@color/primary">
@@ -51,20 +51,12 @@
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Saldo atual"
-                        android:textColor="@color/primary_text_subtle"
-                        android:textSize="13sp" />
-                </LinearLayout>
+                    android:text="Saldo atual"
+                    android:textColor="@color/primary_text_subtle"
+                    android:textSize="13sp" />
 
                 <TextView
                     android:id="@+id/tvBalance"
@@ -74,23 +66,12 @@
                     android:text="R$ 0,00"
                     android:textColor="@color/on_primary"
                     android:textSize="36sp"
-                    android:textStyle="bold"
-                    android:clickable="true"
-                    android:focusable="true" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="Toque no valor para ajustar"
-                    android:textColor="@color/primary_text_subtle"
-                    android:textSize="11sp" />
+                    android:textStyle="bold" />
 
             </LinearLayout>
-
         </androidx.cardview.widget.CardView>
 
-        <!-- Cards de receita e despesa -->
+        <!-- Cards receita e despesa -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -98,11 +79,12 @@
             android:weightSum="2"
             android:layout_marginBottom="24dp">
 
+            <!-- Receitas -->
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
+                android:layout_marginEnd="6dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
                 app:cardBackgroundColor="@color/bg_card">
@@ -119,19 +101,19 @@
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="16sp" />
+                        <ImageView
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:src="@drawable/ic_trending_up"
+                            app:tint="@color/income" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="6dp"
+                            android:layout_marginStart="5dp"
                             android:text="Receitas"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
-
                     </LinearLayout>
 
                     <TextView
@@ -141,17 +123,18 @@
                         android:layout_marginTop="8dp"
                         android:text="R$ 0,00"
                         android:textColor="@color/income"
-                        android:textSize="18sp"
+                        android:textSize="17sp"
                         android:textStyle="bold" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Despesas -->
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="6dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
                 app:cardBackgroundColor="@color/bg_card">
@@ -168,19 +151,19 @@
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="16sp" />
+                        <ImageView
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:src="@drawable/ic_trending_down"
+                            app:tint="@color/expense" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="6dp"
+                            android:layout_marginStart="5dp"
                             android:text="Despesas"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
-
                     </LinearLayout>
 
                     <TextView
@@ -190,7 +173,7 @@
                         android:layout_marginTop="8dp"
                         android:text="R$ 0,00"
                         android:textColor="@color/expense"
-                        android:textSize="18sp"
+                        android:textSize="17sp"
                         android:textStyle="bold" />
 
                 </LinearLayout>
@@ -204,15 +187,15 @@
             android:layout_height="wrap_content"
             android:text="Buscar transações"
             android:textColor="@color/text_heading"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:textStyle="bold"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginBottom="8dp" />
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            app:cardCornerRadius="14dp"
+            app:cardCornerRadius="12dp"
             app:cardElevation="0dp"
             app:cardBackgroundColor="@color/bg_card">
 
@@ -226,12 +209,12 @@
                 android:paddingTop="4dp"
                 android:paddingBottom="4dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🔍"
-                    android:textSize="18sp"
-                    android:layout_marginEnd="10dp" />
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginEnd="10dp"
+                    android:src="@drawable/ic_search"
+                    app:tint="@color/text_hint" />
 
                 <EditText
                     android:id="@+id/etSearch"
@@ -239,7 +222,7 @@
                     android:layout_height="48dp"
                     android:layout_weight="1"
                     android:background="@null"
-                    android:hint="Digite o título da transação..."
+                    android:hint="Buscar por título..."
                     android:textColor="@color/text_body"
                     android:textColorHint="@color/text_hint"
                     android:textSize="14sp"
@@ -281,17 +264,16 @@
             android:nestedScrollingEnabled="false"
             android:visibility="gone" />
 
-        <!-- Botão Nova Transferência -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnNovaTransferencia"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="52dp"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="12dp"
-            android:text="+ Nova transferência"
+            android:text="Nova transação"
             android:textSize="15sp"
             android:textStyle="bold"
-            app:cornerRadius="14dp"
+            app:cornerRadius="12dp"
             app:backgroundTint="@color/primary" />
 
     </LinearLayout>

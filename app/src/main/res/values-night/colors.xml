@@ -33,6 +33,13 @@
     <color name="expense_bg">#3B0000</color>
     <color name="expense_text">#FECACA</color>
 
+    <color name="logout_bg">#3B0000</color>
+    <color name="logout_stroke">#3B0000</color>
+
+    <color name="settings_badge_profile">#1E3A5F</color>
+    <color name="settings_badge_display">#2D1B69</color>
+    <color name="settings_badge_salary">#052E16</color>
+
     <!-- aliases usados no themes.xml night -->
     <color name="dark_primary">#3B82F6</color>
     <color name="dark_primary_hover">#2563EB</color>

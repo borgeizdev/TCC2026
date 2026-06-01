@@ -1,6 +1,8 @@
 package com.borgeiz.meutcc2026
 
+import android.content.res.ColorStateList
 import android.os.Bundle
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -17,14 +19,18 @@ import java.util.Calendar
 
 class MainActivity : AppCompatActivity() {
 
-    // IDs dos labels da bottom bar para colorir aba ativa
     private lateinit var labelDashboard:    TextView
     private lateinit var labelTransactions: TextView
     private lateinit var labelReports:      TextView
     private lateinit var labelProfile:      TextView
 
-    // Aba ativa atual
-    private var currentTab = 0  // 0=Home, 1=Transações, 2=Relatórios, 3=Perfil
+    private lateinit var iconDashboard:    ImageView
+    private lateinit var iconTransactions: ImageView
+    private lateinit var iconReports:      ImageView
+    private lateinit var iconProfile:      ImageView
+
+    private var currentTab = 0
+    private var lastNavMs = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,36 +47,71 @@ class MainActivity : AppCompatActivity() {
         labelReports      = findViewById(R.id.labelReports)
         labelProfile      = findViewById(R.id.labelProfile)
 
-        // Abre dashboard na inicialização
-        navigateTo(DashboardFragment(), 0)
+        iconDashboard    = findViewById(R.id.iconDashboard)
+        iconTransactions = findViewById(R.id.iconTransactions)
+        iconReports      = findViewById(R.id.iconReports)
+        iconProfile      = findViewById(R.id.iconProfile)
 
-        btnDashboard.setOnClickListener {
+        if (savedInstanceState == null) {
             navigateTo(DashboardFragment(), 0)
+        } else {
+            currentTab = savedInstanceState.getInt("current_tab", 0)
+            updateBottomNav()
         }
-        btnTransactions.setOnClickListener {
-            navigateTo(TransactionsFragment(), 1)
-        }
+
+        btnDashboard.setOnClickListener    { navigateTo(DashboardFragment(), 0) }
+        btnTransactions.setOnClickListener { navigateTo(TransactionsFragment(), 1) }
         btnAdd.setOnClickListener {
+            currentTab = -1
+            updateBottomNav()
             supportFragmentManager.beginTransaction()
                 .replace(R.id.frameContainer, AddTransactionFragment())
                 .addToBackStack(null)
-                .commit()
+                .commitAllowingStateLoss()
         }
-        btnReports.setOnClickListener {
-            navigateTo(ReportsFragment(), 2)
-        }
-        btnProfile.setOnClickListener {
-            navigateTo(ProfileFragment(), 3)
+        btnReports.setOnClickListener { navigateTo(ReportsFragment(), 2) }
+        btnProfile.setOnClickListener { navigateTo(ProfileFragment(), 3) }
+
+        supportFragmentManager.addOnBackStackChangedListener {
+            if (supportFragmentManager.backStackEntryCount == 0 && currentTab == -1) {
+                val f = supportFragmentManager.findFragmentById(R.id.frameContainer)
+                currentTab = when (f) {
+                    is DashboardFragment    -> 0
+                    is TransactionsFragment -> 1
+                    is ReportsFragment      -> 2
+                    is ProfileFragment      -> 3
+                    else                    -> 0
+                }
+                updateBottomNav()
+            }
         }
 
         checkAndPostSalaryIfNeeded()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("current_tab", currentTab)
+    }
+
+    fun openAddTransaction() {
+        currentTab = -1
+        updateBottomNav()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.frameContainer, AddTransactionFragment())
+            .addToBackStack(null)
+            .commitAllowingStateLoss()
+    }
+
     private fun navigateTo(fragment: Fragment, tab: Int) {
+        val now = System.currentTimeMillis()
+        if (now - lastNavMs < 200) return
+        if (currentTab == tab && supportFragmentManager.findFragmentById(R.id.frameContainer) != null) return
+        lastNavMs = now
         currentTab = tab
         supportFragmentManager.beginTransaction()
             .replace(R.id.frameContainer, fragment)
-            .commit()
+            .commitAllowingStateLoss()
         updateBottomNav()
     }
 
@@ -78,22 +119,31 @@ class MainActivity : AppCompatActivity() {
         val activeColor   = ContextCompat.getColor(this, R.color.primary)
         val inactiveColor = ContextCompat.getColor(this, R.color.text_hint)
 
-        // Reseta todos para inativo
         listOf(labelDashboard, labelTransactions, labelReports, labelProfile).forEach {
             it.setTextColor(inactiveColor)
             it.typeface = android.graphics.Typeface.DEFAULT
         }
+        listOf(iconDashboard, iconTransactions, iconReports, iconProfile).forEach {
+            it.imageTintList = ColorStateList.valueOf(inactiveColor)
+        }
 
-        // Ativa o label da aba atual
         val activeLabel = when (currentTab) {
             0 -> labelDashboard
             1 -> labelTransactions
             2 -> labelReports
             3 -> labelProfile
-            else -> labelDashboard
+            else -> null
         }
-        activeLabel.setTextColor(activeColor)
-        activeLabel.typeface = android.graphics.Typeface.DEFAULT_BOLD
+        val activeIcon = when (currentTab) {
+            0 -> iconDashboard
+            1 -> iconTransactions
+            2 -> iconReports
+            3 -> iconProfile
+            else -> null
+        }
+        activeLabel?.setTextColor(activeColor)
+        activeLabel?.typeface = android.graphics.Typeface.DEFAULT_BOLD
+        activeIcon?.imageTintList = ColorStateList.valueOf(activeColor)
     }
 
     private fun checkAndPostSalaryIfNeeded() {

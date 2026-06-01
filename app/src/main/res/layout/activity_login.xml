@@ -8,10 +8,10 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="32dp"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal|center_vertical">
 
         <!-- Cabeçalho -->
         <LinearLayout
@@ -19,14 +19,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:layout_marginTop="48dp"
-            android:layout_marginBottom="40dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="💰"
-                android:textSize="48sp" />
+            android:layout_marginBottom="32dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -149,7 +142,7 @@
                 android:textColor="@color/text_secondary"
                 android:textSize="14sp" />
 
-            <Button
+            <TextView
                 android:id="@+id/btnRegister"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -157,9 +150,9 @@
                 android:textColor="@color/primary"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:background="@null"
-                android:paddingStart="0dp"
-                android:paddingEnd="0dp" />
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless" />
 
         </LinearLayout>
 

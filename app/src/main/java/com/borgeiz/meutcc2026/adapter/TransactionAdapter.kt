@@ -1,11 +1,11 @@
 package com.borgeiz.meutcc2026.adapter
 
 import android.content.Intent
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.borgeiz.meutcc2026.EditTransactionActivity
 import com.borgeiz.meutcc2026.R
@@ -19,7 +19,6 @@ class TransactionAdapter(
         val tvTitle:  TextView = itemView.findViewById(R.id.tvTitle)
         val tvInfo:   TextView = itemView.findViewById(R.id.tvInfo)
         val tvAmount: TextView = itemView.findViewById(R.id.tvAmount)
-        val tvIcon:   TextView = itemView.findViewById(R.id.tvIcon)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
@@ -32,22 +31,21 @@ class TransactionAdapter(
 
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val item = list[position]
+        val ctx  = holder.itemView.context
 
-        holder.tvTitle.text  = item.title
-        holder.tvInfo.text   = "${item.category}  ·  ${item.date}"
-        holder.tvAmount.text = "R$ %.2f".format(item.amount)
+        holder.tvTitle.text = item.title
+        holder.tvInfo.text  = "${item.category}  ·  ${item.date}"
 
-        // Cor e ícone por tipo
         if (item.type == "receita") {
-            holder.tvAmount.setTextColor(Color.parseColor("#10B981"))
-            holder.tvIcon.text = "💰"
+            holder.tvAmount.text = "+R$ %.2f".format(item.amount)
+            holder.tvAmount.setTextColor(ContextCompat.getColor(ctx, R.color.income))
         } else {
-            holder.tvAmount.setTextColor(Color.parseColor("#EF4444"))
-            holder.tvIcon.text = "💸"
+            holder.tvAmount.text = "-R$ %.2f".format(item.amount)
+            holder.tvAmount.setTextColor(ContextCompat.getColor(ctx, R.color.expense))
         }
 
         holder.itemView.setOnClickListener {
-            val intent = Intent(holder.itemView.context, EditTransactionActivity::class.java).apply {
+            val intent = Intent(ctx, EditTransactionActivity::class.java).apply {
                 putExtra("id",          item.id)
                 putExtra("type",        item.type)
                 putExtra("title",       item.title)
@@ -56,7 +54,7 @@ class TransactionAdapter(
                 putExtra("date",        item.date)
                 putExtra("description", item.description)
             }
-            holder.itemView.context.startActivity(intent)
+            ctx.startActivity(intent)
         }
     }
 }

@@ -27,6 +27,9 @@ class TransactionsFragment : Fragment() {
     private lateinit var spFilterMonth: Spinner
     private val allTransactions = mutableListOf<Transaction>()
 
+    private var txListener: ValueEventListener? = null
+    private var txRef: com.google.firebase.database.DatabaseReference? = null
+
     private val monthLabels = listOf(
         "Todos os meses",
         "Janeiro", "Fevereiro", "Março", "Abril",
@@ -74,23 +77,31 @@ class TransactionsFragment : Fragment() {
         return view
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        txRef?.let { ref -> txListener?.let { ref.removeEventListener(it) } }
+        txListener = null
+        txRef = null
+    }
+
     private fun loadTransactions() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        FirebaseDatabase.getInstance().reference
+        txRef = FirebaseDatabase.getInstance().reference
             .child("users").child(uid).child("transactions")
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    allTransactions.clear()
-                    for (item in snapshot.children) {
-                        val t = item.getValue(Transaction::class.java)
-                        if (t != null) allTransactions.add(t)
-                    }
-                    // Ordena por data decrescente
-                    allTransactions.sortByDescending { it.date }
-                    applyFilter()
+        txListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (!isAdded) return
+                allTransactions.clear()
+                for (item in snapshot.children) {
+                    val t = item.getValue(Transaction::class.java)
+                    if (t != null) allTransactions.add(t)
                 }
-                override fun onCancelled(error: DatabaseError) {}
-            })
+                allTransactions.sortByDescending { it.date }
+                applyFilter()
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        }
+        txRef!!.addValueEventListener(txListener!!)
     }
 
     private fun applyFilter() {
