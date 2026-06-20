@@ -228,11 +228,13 @@ class ProfileFragment : Fragment() {
                     Toast.makeText(ctx, "Informe um nome.", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
-                ref.child("name").setValue(newName).addOnSuccessListener {
-                    tvName.text   = newName
-                    tvAvatar.text = newName.firstOrNull()?.uppercase() ?: "U"
-                    Toast.makeText(ctx, "Nome atualizado!", Toast.LENGTH_SHORT).show()
-                }
+                val email = auth.currentUser?.email ?: tvEmail.text.toString()
+                ref.setValue(mapOf("name" to newName, "email" to email))
+                    .addOnSuccessListener {
+                        tvName.text   = newName
+                        tvAvatar.text = newName.firstOrNull()?.uppercase() ?: "U"
+                        Toast.makeText(ctx, "Nome atualizado!", Toast.LENGTH_SHORT).show()
+                    }
             }
             .setNegativeButton("Cancelar", null)
             .show()
