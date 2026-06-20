@@ -56,7 +56,7 @@ class RegisterActivity : AppCompatActivity() {
                             .child("categories").push().key!!
                         db.child("users").child(uid).child("categories")
                             .child(key)
-                            .setValue(mapOf("id" to key, "name" to categoryName))
+                            .setValue(mapOf("name" to categoryName))
                     }
 
                     Toast.makeText(this, "Conta criada com sucesso", Toast.LENGTH_SHORT).show()

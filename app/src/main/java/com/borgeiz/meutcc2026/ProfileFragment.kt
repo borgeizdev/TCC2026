@@ -468,11 +468,7 @@ class ProfileFragment : Fragment() {
         btnCancel.setOnClickListener { dialog.dismiss() }
         btnSave.setOnClickListener {
             val entries = collectEntries() ?: return@setOnClickListener
-            val config  = SalaryConfig(
-                amount     = entries.firstOrNull()?.amount ?: 0.0,
-                dayOfMonth = entries.firstOrNull()?.dayOfMonth ?: 0,
-                entries    = entries
-            )
+            val config  = SalaryConfig(entries = entries)
             db.child("salaryConfig").setValue(config)
                 .addOnSuccessListener {
                     Toast.makeText(ctx, "Receita fixa salva!", Toast.LENGTH_SHORT).show()
@@ -551,7 +547,6 @@ class ProfileFragment : Fragment() {
                         val key = txRef.push().key ?: return@forEach
                         txRef.child(key).setValue(
                             Transaction(
-                                id          = key,
                                 type        = "receita",
                                 title       = "Salário",
                                 amount      = entry.amount,

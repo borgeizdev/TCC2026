@@ -186,7 +186,7 @@ class SalaryFragment : Fragment() {
                         val key = txRef.push().key ?: return@forEach
                         txRef.child(key).setValue(
                             Transaction(
-                                id = key, type = "receita", title = "Salário",
+                                type = "receita", title = "Salário",
                                 amount = entry.amount, category = "Salário",
                                 date = expectedDate, description = "Salário automático"
                             )

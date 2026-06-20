@@ -1,7 +1,9 @@
 package com.borgeiz.meutcc2026.model
 
+import com.google.firebase.database.Exclude
+
 data class Transaction(
-    var id: String = "",
+    @get:Exclude @set:Exclude var id: String = "",
     var type: String = "",
     var title: String = "",
     var amount: Double = 0.0,

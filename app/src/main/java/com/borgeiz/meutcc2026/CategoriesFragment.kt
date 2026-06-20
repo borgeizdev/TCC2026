@@ -36,7 +36,7 @@ class CategoriesFragment : Fragment() {
             val name = etName.text.toString().trim()
             if (name.isEmpty()) return@setOnClickListener
             val key = ref.push().key!!
-            ref.child(key).setValue(Category(key, name))
+            ref.child(key).setValue(Category(name))
             etName.text.clear()
         }
 

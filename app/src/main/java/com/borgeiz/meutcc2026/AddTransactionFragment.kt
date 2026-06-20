@@ -91,7 +91,6 @@ class AddTransactionFragment : Fragment() {
 
             ref.child(key).setValue(
                 Transaction(
-                    id          = key,
                     type        = typeSnapshot,
                     title       = titleStr,
                     amount      = amount,

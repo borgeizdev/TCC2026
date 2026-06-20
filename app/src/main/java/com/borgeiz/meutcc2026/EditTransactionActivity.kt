@@ -88,7 +88,6 @@ class EditTransactionActivity : AppCompatActivity() {
             if (amount == null || amount <= 0.0) { etAmount.error = "Informe um valor valido"; return@setOnClickListener }
 
             val transaction = Transaction(
-                id          = id,
                 type        = type,
                 title       = titleStr,
                 amount      = amount,

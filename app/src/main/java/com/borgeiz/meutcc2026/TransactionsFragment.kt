@@ -93,8 +93,9 @@ class TransactionsFragment : Fragment() {
                 if (!isAdded) return
                 allTransactions.clear()
                 for (item in snapshot.children) {
-                    val t = item.getValue(Transaction::class.java)
-                    if (t != null) allTransactions.add(t)
+                    val t = item.getValue(Transaction::class.java) ?: continue
+                    t.id = item.key ?: ""
+                    allTransactions.add(t)
                 }
                 allTransactions.sortByDescending { it.date }
                 applyFilter()
