@@ -43,22 +43,6 @@ class RegisterActivity : AppCompatActivity() {
                     )
                     db.child("users").child(uid).child("profile").setValue(profile)
 
-                    val defaultCategories = listOf(
-                        "Alimentacao",
-                        "Transporte",
-                        "Lazer",
-                        "Farmacia",
-                        "Salario"
-                    )
-
-                    defaultCategories.forEach { categoryName ->
-                        val key = db.child("users").child(uid)
-                            .child("categories").push().key!!
-                        db.child("users").child(uid).child("categories")
-                            .child(key)
-                            .setValue(mapOf("name" to categoryName))
-                    }
-
                     Toast.makeText(this, "Conta criada com sucesso", Toast.LENGTH_SHORT).show()
                     finish()
                 }
