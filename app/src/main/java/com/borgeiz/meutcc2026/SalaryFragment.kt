@@ -70,11 +70,7 @@ class SalaryFragment : Fragment() {
         }
 
         view.findViewById<MaterialButton>(R.id.btnSave).setOnClickListener {
-            val config = SalaryConfig(
-                amount     = entries.firstOrNull()?.amount ?: 0.0,
-                dayOfMonth = entries.firstOrNull()?.dayOfMonth ?: 1,
-                entries    = entries.toList()
-            )
+            val config = SalaryConfig(entries = entries.toList())
             db.child("salaryConfig").setValue(config)
                 .addOnSuccessListener {
                     if (!isAdded) return@addOnSuccessListener
