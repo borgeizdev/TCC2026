@@ -170,6 +170,7 @@ class MainActivity : AppCompatActivity() {
                         }.toSet()
 
                         entries.forEach { entry ->
+                            if (entry.dayOfMonth == 0) return@forEach
                             if (today < entry.dayOfMonth) return@forEach
                             val expectedDate = "%04d-%02d-%02d".format(year, month, entry.dayOfMonth)
                             if (expectedDate !in existingDates) {
