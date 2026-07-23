@@ -138,6 +138,7 @@ class DashboardFragment : Fragment() {
                 allTransactions.clear()
                 for (item in snapshot.children) {
                     val t = item.getValue(Transaction::class.java) ?: continue
+                    t.id = item.key ?: ""
                     allTransactions.add(t)
                     if (t.type == "receita") income  += t.amount
                     if (t.type == "despesa") expense += t.amount
