@@ -1,6 +1,7 @@
 package com.borgeiz.meutcc2026
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -42,9 +43,19 @@ class RegisterActivity : AppCompatActivity() {
                         "email" to email
                     )
                     db.child("users").child(uid).child("profile").setValue(profile)
-
-                    Toast.makeText(this, "Conta criada com sucesso", Toast.LENGTH_SHORT).show()
-                    finish()
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Conta criada com sucesso", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("RegisterActivity", "Falha ao salvar perfil do usuário $uid", e)
+                            Toast.makeText(
+                                this,
+                                "Conta criada, mas houve um erro ao salvar seu perfil. Verifique sua conexão e tente novamente mais tarde.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            finish()
+                        }
                 }
                 .addOnFailureListener {
                     Toast.makeText(this, "Erro: ${it.message}", Toast.LENGTH_SHORT).show()
