@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import com.borgeiz.meutcc2026.model.SalaryConfig
 import com.borgeiz.meutcc2026.model.SalaryEntry
 import com.borgeiz.meutcc2026.model.Transaction
+import com.borgeiz.meutcc2026.util.parseAmountPtBr
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -393,7 +394,6 @@ class ProfileFragment : Fragment() {
                 val etDay  = row.getChildAt(0) as? EditText ?: continue
                 val etAmt  = row.getChildAt(1) as? EditText ?: continue
                 val dayStr = etDay.text.toString().trim()
-                val amtStr = etAmt.text.toString().trim().replace(",", ".")
                 val day: Int
                 if (dayStr.isEmpty()) {
                     day = 0
@@ -405,7 +405,7 @@ class ProfileFragment : Fragment() {
                     etDay.error = null
                     day = parsed
                 }
-                val amount = amtStr.toDoubleOrNull()
+                val amount = parseAmountPtBr(etAmt.text.toString())
                 if (amount == null || amount <= 0) {
                     etAmt.error = "Valor inválido"; return null
                 }

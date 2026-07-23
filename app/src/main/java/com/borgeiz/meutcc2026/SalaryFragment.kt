@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.borgeiz.meutcc2026.model.SalaryConfig
 import com.borgeiz.meutcc2026.model.SalaryEntry
 import com.borgeiz.meutcc2026.model.Transaction
+import com.borgeiz.meutcc2026.util.parseAmountPtBr
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -118,7 +119,6 @@ class SalaryFragment : Fragment() {
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val dayStr = etDay.text?.toString()?.trim() ?: ""
-            val amtStr = etAmount.text?.toString()?.trim()?.replace(",", ".") ?: ""
 
             val day: Int
             if (dayStr.isEmpty()) {
@@ -133,7 +133,7 @@ class SalaryFragment : Fragment() {
             }
             tilDay.error = null
 
-            val amount = amtStr.toDoubleOrNull()
+            val amount = parseAmountPtBr(etAmount.text?.toString())
             if (amount == null || amount <= 0) {
                 tilAmount.error = "Informe um valor válido"
                 return@setOnClickListener

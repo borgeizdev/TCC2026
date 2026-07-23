@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.borgeiz.meutcc2026.model.Transaction
+import com.borgeiz.meutcc2026.util.parseAmountPtBr
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import java.util.Calendar
@@ -87,9 +88,8 @@ class EditTransactionActivity : AppCompatActivity() {
 
         btnUpdate.setOnClickListener {
             val titleStr  = etTitle.text?.toString()?.trim() ?: ""
-            val amountStr = etAmount.text?.toString()?.trim()?.replace(",", ".") ?: ""
             if (titleStr.isEmpty()) { etTitle.error = "Informe o titulo"; return@setOnClickListener }
-            val amount = amountStr.toDoubleOrNull()
+            val amount = parseAmountPtBr(etAmount.text?.toString())
             if (amount == null || amount <= 0.0) { etAmount.error = "Informe um valor valido"; return@setOnClickListener }
 
             val transaction = Transaction(

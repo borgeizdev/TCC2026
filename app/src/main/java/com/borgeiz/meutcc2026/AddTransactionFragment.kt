@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.borgeiz.meutcc2026.model.Transaction
+import com.borgeiz.meutcc2026.util.parseAmountPtBr
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import java.util.Calendar
@@ -76,12 +77,11 @@ class AddTransactionFragment : Fragment() {
             }
 
             val titleStr  = etTitle.text?.toString()?.trim() ?: ""
-            val amountStr = etAmount.text?.toString()?.trim()?.replace(",", ".") ?: ""
             val dateStr   = etDate.text?.toString()?.trim() ?: ""
             val descStr   = etDescription.text?.toString()?.trim() ?: ""
 
             if (titleStr.isEmpty()) { etTitle.error = "Informe o título"; return@setOnClickListener }
-            val amount = amountStr.toDoubleOrNull()
+            val amount = parseAmountPtBr(etAmount.text?.toString())
             if (amount == null || amount <= 0.0) { etAmount.error = "Informe um valor válido"; return@setOnClickListener }
 
             val typeSnapshot  = selectedType
