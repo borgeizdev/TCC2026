@@ -518,15 +518,6 @@ class ProfileFragment : Fragment() {
         dialog.show()
     }
 
-    private fun updateSalaryStatusText(tv: TextView, entries: List<SalaryEntry>) {
-        tv.text = if (entries.isEmpty()) {
-            "Configure os dias e valores acima e salve."
-        } else {
-            val plural = if (entries.size > 1) "${entries.size} entradas configuradas" else "1 entrada configurada"
-            "Ativo — $plural. Lançamento automático ao abrir o app após o dia configurado."
-        }
-    }
-
     private fun checkAndPostSalaryIfNeeded(uid: String, config: SalaryConfig) {
         val cal   = Calendar.getInstance()
         val today = cal.get(Calendar.DAY_OF_MONTH)
