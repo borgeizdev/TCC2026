@@ -15,6 +15,9 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.borgeiz.meutcc2026.data.TransactionsRepository
+import com.borgeiz.meutcc2026.data.expenseTotal
+import com.borgeiz.meutcc2026.data.incomeTotal
 import com.borgeiz.meutcc2026.model.Transaction
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.PieChart
@@ -49,6 +52,16 @@ class ReportsFragment : Fragment() {
         "#4F46E5", "#BE185D"
     )
 
+    private var txRepoRef: TransactionsRepository? = null
+    private var txListenerRef: ValueEventListener? = null
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        txRepoRef?.let { repo -> txListenerRef?.let { repo.removeObserver(it) } }
+        txRepoRef = null
+        txListenerRef = null
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -76,7 +89,9 @@ class ReportsFragment : Fragment() {
         barChart.setNoDataText("")
 
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return view
-        val db  = FirebaseDatabase.getInstance().reference.child("users").child(uid)
+        val db   = FirebaseDatabase.getInstance().reference.child("users").child(uid)
+        val txRepo = TransactionsRepository(uid)
+        txRepoRef = txRepo
 
         var allTransactions = listOf<Transaction>()
         var adjustment = 0.0
@@ -112,6 +127,18 @@ class ReportsFragment : Fragment() {
             }
         }
 
+        fun renderSummary() {
+            val totalIncome  = allTransactions.incomeTotal()
+            val totalExpense = allTransactions.expenseTotal()
+            val balance = totalIncome - totalExpense + adjustment
+            tvIncome.text  = "R$ %.2f".format(totalIncome)
+            tvExpense.text = "R$ %.2f".format(totalExpense)
+            tvBalance.text = "R$ %.2f".format(balance)
+
+            setupBarChart(barChart, allTransactions)
+            refreshCategoryChart(spCatMonth.selectedItemPosition)
+        }
+
         spCatMonth.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
                 refreshCategoryChart(pos)
@@ -123,35 +150,16 @@ class ReportsFragment : Fragment() {
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(adjSnapshot: DataSnapshot) {
                     adjustment = adjSnapshot.getValue(Double::class.java) ?: 0.0
-
-                    db.child("transactions")
-                        .addValueEventListener(object : ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                var totalIncome  = 0.0
-                                var totalExpense = 0.0
-                                val txList = mutableListOf<Transaction>()
-
-                                for (item in snapshot.children) {
-                                    val t = item.getValue(Transaction::class.java) ?: continue
-                                    txList.add(t)
-                                    if (t.type == "receita") totalIncome  += t.amount
-                                    if (t.type == "despesa") totalExpense += t.amount
-                                }
-                                allTransactions = txList
-
-                                val balance = totalIncome - totalExpense + adjustment
-                                tvIncome.text  = "R$ %.2f".format(totalIncome)
-                                tvExpense.text = "R$ %.2f".format(totalExpense)
-                                tvBalance.text = "R$ %.2f".format(balance)
-
-                                setupBarChart(barChart, txList)
-                                refreshCategoryChart(spCatMonth.selectedItemPosition)
-                            }
-                            override fun onCancelled(error: DatabaseError) {}
-                        })
+                    renderSummary()
                 }
                 override fun onCancelled(error: DatabaseError) {}
             })
+
+        txListenerRef = txRepo.observe { transactions ->
+            if (!isAdded) return@observe
+            allTransactions = transactions
+            renderSummary()
+        }
 
         return view
     }

@@ -12,11 +12,9 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.borgeiz.meutcc2026.adapter.TransactionAdapter
+import com.borgeiz.meutcc2026.data.TransactionsRepository
 import com.borgeiz.meutcc2026.model.Transaction
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import java.util.Calendar
 
@@ -27,8 +25,8 @@ class TransactionsFragment : Fragment() {
     private lateinit var spFilterMonth: Spinner
     private val allTransactions = mutableListOf<Transaction>()
 
+    private var txRepo: TransactionsRepository? = null
     private var txListener: ValueEventListener? = null
-    private var txRef: com.google.firebase.database.DatabaseReference? = null
 
     private val monthLabels = listOf(
         "Todos os meses",
@@ -79,30 +77,22 @@ class TransactionsFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        txRef?.let { ref -> txListener?.let { ref.removeEventListener(it) } }
+        txRepo?.let { repo -> txListener?.let { repo.removeObserver(it) } }
         txListener = null
-        txRef = null
+        txRepo = null
     }
 
     private fun loadTransactions() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        txRef = FirebaseDatabase.getInstance().reference
-            .child("users").child(uid).child("transactions")
-        txListener = object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (!isAdded) return
-                allTransactions.clear()
-                for (item in snapshot.children) {
-                    val t = item.getValue(Transaction::class.java) ?: continue
-                    t.id = item.key ?: ""
-                    allTransactions.add(t)
-                }
-                allTransactions.sortByDescending { it.date }
-                applyFilter()
-            }
-            override fun onCancelled(error: DatabaseError) {}
+        val repo = TransactionsRepository(uid)
+        txRepo = repo
+        txListener = repo.observe { transactions ->
+            if (!isAdded) return@observe
+            allTransactions.clear()
+            allTransactions.addAll(transactions)
+            allTransactions.sortByDescending { it.date }
+            applyFilter()
         }
-        txRef!!.addValueEventListener(txListener!!)
     }
 
     private fun applyFilter() {

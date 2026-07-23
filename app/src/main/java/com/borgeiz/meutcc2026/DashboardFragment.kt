@@ -12,6 +12,9 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.borgeiz.meutcc2026.adapter.TransactionAdapter
+import com.borgeiz.meutcc2026.data.TransactionsRepository
+import com.borgeiz.meutcc2026.data.expenseTotal
+import com.borgeiz.meutcc2026.data.incomeTotal
 import com.borgeiz.meutcc2026.model.Transaction
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
@@ -35,10 +38,10 @@ class DashboardFragment : Fragment() {
     private val allTransactions = mutableListOf<Transaction>()
 
     // Listeners armazenados para serem removidos em onDestroyView
-    private var txListener:      ValueEventListener? = null
-    private var txRef:           DatabaseReference?  = null
-    private var nameListener:    ValueEventListener? = null
-    private var nameRef:         DatabaseReference?  = null
+    private var txRepo:          TransactionsRepository? = null
+    private var txListener:      ValueEventListener?      = null
+    private var nameListener:    ValueEventListener?      = null
+    private var nameRef:         DatabaseReference?       = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -86,7 +89,7 @@ class DashboardFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        txRef?.let   { ref -> txListener?.let   { ref.removeEventListener(it) } }
+        txRepo?.let  { repo -> txListener?.let  { repo.removeObserver(it) } }
         nameRef?.let { ref -> nameListener?.let { ref.removeEventListener(it) } }
         txListener   = null
         nameListener = null
@@ -129,36 +132,26 @@ class DashboardFragment : Fragment() {
 
     private fun loadSummaryAndTransactions() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        txRef = FirebaseDatabase.getInstance().reference
-            .child("users").child(uid).child("transactions")
-        txListener = object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                var income  = 0.0
-                var expense = 0.0
-                allTransactions.clear()
-                for (item in snapshot.children) {
-                    val t = item.getValue(Transaction::class.java) ?: continue
-                    t.id = item.key ?: ""
-                    allTransactions.add(t)
-                    if (t.type == "receita") income  += t.amount
-                    if (t.type == "despesa") expense += t.amount
-                }
-                allTransactions.sortByDescending { it.date }
+        val repo = TransactionsRepository(uid)
+        txRepo = repo
+        txListener = repo.observe { transactions ->
+            allTransactions.clear()
+            allTransactions.addAll(transactions)
+            allTransactions.sortByDescending { it.date }
 
-                val balance = income - expense
-                tvBalance.text = "R$ %.2f".format(balance)
-                tvBalance.setTextColor(
-                    if (balance >= 0) android.graphics.Color.WHITE
-                    else android.graphics.Color.parseColor("#FCA5A5")
-                )
-                tvIncome.text  = "R$ %.2f".format(income)
-                tvExpense.text = "R$ %.2f".format(expense)
+            val income  = transactions.incomeTotal()
+            val expense = transactions.expenseTotal()
+            val balance = income - expense
+            tvBalance.text = "R$ %.2f".format(balance)
+            tvBalance.setTextColor(
+                if (balance >= 0) android.graphics.Color.WHITE
+                else android.graphics.Color.parseColor("#FCA5A5")
+            )
+            tvIncome.text  = "R$ %.2f".format(income)
+            tvExpense.text = "R$ %.2f".format(expense)
 
-                val query = etSearch.text?.toString()?.trim() ?: ""
-                if (query.isNotEmpty()) applySearch(query)
-            }
-            override fun onCancelled(error: DatabaseError) {}
+            val query = etSearch.text?.toString()?.trim() ?: ""
+            if (query.isNotEmpty()) applySearch(query)
         }
-        txRef!!.addValueEventListener(txListener!!)
     }
 }

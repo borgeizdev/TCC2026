@@ -12,16 +12,14 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.borgeiz.meutcc2026.data.SalaryRepository
 import com.borgeiz.meutcc2026.model.SalaryConfig
 import com.borgeiz.meutcc2026.model.SalaryEntry
-import com.borgeiz.meutcc2026.model.Transaction
 import com.borgeiz.meutcc2026.util.parseAmountPtBr
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
-import java.util.Calendar
 
 class SalaryFragment : Fragment() {
 
@@ -53,18 +51,15 @@ class SalaryFragment : Fragment() {
         rvEntries.adapter = adapter
 
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return view
-        val db  = FirebaseDatabase.getInstance().reference.child("users").child(uid)
+        val salaryRepo = SalaryRepository(uid)
 
-        db.child("salaryConfig").addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val config = snapshot.getValue(SalaryConfig::class.java)
-                entries.clear()
-                entries.addAll(config?.resolvedEntries() ?: emptyList())
-                adapter.notifyDataSetChanged()
-                refreshEmptyState()
-            }
-            override fun onCancelled(error: DatabaseError) {}
-        })
+        salaryRepo.loadConfig { config ->
+            if (!isAdded) return@loadConfig
+            entries.clear()
+            entries.addAll(config?.resolvedEntries() ?: emptyList())
+            adapter.notifyDataSetChanged()
+            refreshEmptyState()
+        }
 
         view.findViewById<MaterialButton>(R.id.btnAddEntry).setOnClickListener {
             showEntryDialog(null)
@@ -72,11 +67,17 @@ class SalaryFragment : Fragment() {
 
         view.findViewById<MaterialButton>(R.id.btnSave).setOnClickListener {
             val config = SalaryConfig(entries = entries.toList())
-            db.child("salaryConfig").setValue(config)
+            salaryRepo.saveConfig(config)
                 .addOnSuccessListener {
                     if (!isAdded) return@addOnSuccessListener
                     Toast.makeText(requireContext(), "Configuração salva!", Toast.LENGTH_SHORT).show()
-                    if (entries.isNotEmpty()) checkAndPostSalaryIfNeeded(uid, config)
+                    if (entries.isNotEmpty()) salaryRepo.checkAndPostSalaryIfNeeded(config) {
+                        if (isAdded) Toast.makeText(
+                            requireContext(),
+                            "Salário de R$ ${"%.2f".format(it.amount)} lançado.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
                 .addOnFailureListener {
                     if (!isAdded) return@addOnFailureListener
@@ -157,48 +158,6 @@ class SalaryFragment : Fragment() {
         val empty = entries.isEmpty()
         tvEmpty.visibility   = if (empty) View.VISIBLE else View.GONE
         rvEntries.visibility = if (empty) View.GONE   else View.VISIBLE
-    }
-
-    private fun checkAndPostSalaryIfNeeded(uid: String, config: SalaryConfig) {
-        val cal   = Calendar.getInstance()
-        val today = cal.get(Calendar.DAY_OF_MONTH)
-        val month = cal.get(Calendar.MONTH) + 1
-        val year  = cal.get(Calendar.YEAR)
-        val txRef = FirebaseDatabase.getInstance().reference
-            .child("users").child(uid).child("transactions")
-
-        txRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val existingDates = snapshot.children.mapNotNull {
-                    val t = it.getValue(Transaction::class.java)
-                    if (t?.title == "Salário" && t.type == "receita") t.date else null
-                }.toSet()
-
-                config.resolvedEntries().forEach { entry ->
-                    if (entry.dayOfMonth == 0) return@forEach
-                    if (today < entry.dayOfMonth) return@forEach
-                    val expectedDate = "%04d-%02d-%02d".format(year, month, entry.dayOfMonth)
-                    if (expectedDate !in existingDates) {
-                        val key = txRef.push().key ?: return@forEach
-                        txRef.child(key).setValue(
-                            Transaction(
-                                type = "receita", title = "Salário",
-                                amount = entry.amount, category = "Salário",
-                                date = expectedDate, description = "Salário automático"
-                            )
-                        ).addOnSuccessListener {
-                            if (!isAdded) return@addOnSuccessListener
-                            Toast.makeText(
-                                requireContext(),
-                                "Salário de R$ ${"%.2f".format(entry.amount)} lançado.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                }
-            }
-            override fun onCancelled(error: DatabaseError) {}
-        })
     }
 
     private class EntryAdapter(
