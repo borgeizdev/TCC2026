@@ -67,7 +67,12 @@ class EditTransactionActivity : AppCompatActivity() {
         }
 
         // Categorias conforme tipo
-        val cats = if (type == "receita") incomeCategories else expenseCategories
+        val cats = (if (type == "receita") incomeCategories else expenseCategories).toMutableList()
+        if (category.isNotBlank() && cats.none { it.equals(category, ignoreCase = true) }) {
+            // Categoria salva não está mais na lista atual: preserva o valor original
+            // como opção em vez de deixar o spinner cair no índice 0 e trocá-la sem avisar.
+            cats.add(0, category)
+        }
         spCategory.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_dropdown_item,
